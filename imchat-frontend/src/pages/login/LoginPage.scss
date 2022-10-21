@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap');
+
+
+
+.login-page {
+	background-image: url('../../imgs/background_edu.png');
+	height: 100%;
+	font-size: 14px;
+
+	.brand {
+		width: 90px;
+		height: 90px;
+		overflow: hidden;
+		border-radius: 50%;
+		margin: 40px auto;
+		box-shadow: 0 4px 8px rgba(0,0,0,.05);
+		position: relative;
+
+		img {
+			width: 100%;
+		}
+	}
+
+	.row.justify-content-md-center.h-100 {
+		height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: relative;
+	}
+
+	.card-wrapper {
+		width: 400px;
+		position: absolute;
+		
+	
+		.card {
+			border-color: transparent;
+			box-shadow: 0 4px 8px rgba(0,0,0,.05);
+			width: 100%;
+
+			.fat {
+					height: 350px;
+					padding: 10px;
+
+					background-color: #f0f0f0;
+					border-radius: 10px;
+					border-color: black;
+					border-width: 3px;
+			}
+		}
+	}
+}
+
+.login-page .card.fat {
+	height: 350px;
+	padding: 10px;
+
+	background-color: #f0f0f0;
+	border-radius: 10px;
+	border-color: black;
+	border-width: 3px;
+}
+
+.login-page .card-body {
+	// margin-bottom: 100px;
+	margin-top: 180px;
+}
+
+.login-page .card-body .card-title-container{
+	width: 354;
+	display: flex;
+	justify-content: center;
+}
+
+.login-page .card .card-title {
+	// bottom: 200px;
+	top: 20px;
+	width: 102px;
+	height: 127px;
+	margin: 0;
+	background-image: url('../../imgs/logo_utec.png');
+	background-repeat: no-repeat;
+	position: absolute;	
+}
+
+.login-page .form-control {
+	border-width: 2.3px;
+}
+
+.login-page .form-group label {
+	width: 100%;
+	font-family: 'Rubik', sans-serif;
+}
+
+.login-page .btn.btn-block {
+	padding: 12px 10px;
+}
+
+.login-page .footer {
+	margin: 40px 0;
+	color: #888;
+	text-align: center;
+}
+
+.login-page .form-group-m-0 {
+	display: flex;
+	position: relative;
+}
+
+input {
+	width: auto;
+	right: 0;
+}
+
+input[type=text] {
+	border-color: black;
+}
+
+input[type=password] {
+	border-color: black;
+}
+
+#login-btn {
+	position: absolute;
+	left: 0px;
+	top: 10px;
+}
+
+#register-btn {
+	position: absolute;
+	right: 0px;
+	top: 10px;
+}
+
+@media screen and (max-width: 425px) {
+	.login-page .card-wrapper {
+		width: 90%;
+		margin: 0 auto;
+	}
+}
+
+@media screen and (max-width: 320px) {
+	.login-page .card.fat {
+		padding: 0;
+	}
+
+	.login-page .card.fat .card-body {
+		padding: 15px;
+	}
+}
