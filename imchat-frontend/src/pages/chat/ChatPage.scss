@@ -37,8 +37,8 @@
             // float: left;
 
             input[type='text'] {
-                width: 80%;
-                height: 60%;
+                width: 90%;
+                height: 80%;
                 font-size: 20px;
                 background-color: rgb(248, 248, 248);
                 border-radius: 10px;
@@ -56,6 +56,7 @@
                 transform: rotate(90deg);
 
                 :hover {
+                    color: rgb(0, 174, 216);;
                     cursor: pointer;
                 }
             }
@@ -113,11 +114,13 @@
             .user {
                 background-color: rgb(248, 248, 248);
                 border: 1px solid rgb(50, 50, 50);
+                border-top: 0;
+                border-bottom: 2px solid rgb(50, 50, 50);
                 font-family: 'Inter', sans-serif;
                 padding: 10px 10px 10px 10px;
 
                 .name {
-                    color: aqua;
+                    color: rgb(54, 214, 254);;
                     font-size: 24px;
                 }
 
@@ -126,11 +129,11 @@
                     font-size: 16px;
                 }
             }
-
-            :hover {
+            .user:hover {
                 cursor : pointer;
-                background-color: blueviolet;
+                background-color: rgba(182, 182, 182, 0.779);
             }
+
         }
 
         .contacts::-webkit-scrollbar {
@@ -141,20 +144,15 @@
             width: 75%;
             height: 100%;
             background-image: url(./../../imgs/background_edu.png);
-            // padding: 0px 15px 0px 15px;
-            
-            // float: right;
             display: flex;
             flex-direction: column;
-            // direction: column;
-            // position: relative;
             
             .chat-msg {
                 width: 100%;
                 height: 85%;
                 max-height: fit-content;
                 font-family: 'Inter', sans-serif;
-                padding: 5px 0px 5px 0px;
+                padding: 5px 15px 5px 15px;
                 border: none;
 
                 position: relative;
@@ -162,11 +160,11 @@
                 top: 0px;
                 display: flex;
                 flex-direction: column;
-                // align-self: flex-start;
-                // margin-bottom: 50px;
 
                 .container{
                     padding: 5px 15px 5px 15px;
+                    display: flex;
+                    // justify-content: flex-end;
                 
                     .wrapper{
                         margin-bottom: 5px;
@@ -174,15 +172,14 @@
                         .msg{
                             width: fit-content;
                             height: 100%;
-                            min-width: 400px;
+                            min-width: 300px;
                             line-height: 50px;
-                            border: 1px solid lightgreen;
+                            border: 1px solid rgb(50, 50, 50);
                             position: relative;
                             padding-left: 20px;
                             border-radius: 10px;
                             filter: drop-shadow(0 0 2px #999);
                             background: #fff;
-
                         }
 
                         .msg::before{
@@ -192,7 +189,7 @@
                             top: 30px;
                             border-top: 6px solid transparent;
                             border-bottom: 6px solid transparent;
-                            border-right:10px solid lightgreen;
+                            border-right:10px solid rgb(50, 50, 50);
                         }
                         
                         .msg::after{
@@ -203,6 +200,45 @@
                             border-top: 6px solid transparent;
                             border-bottom: 6px solid transparent;
                             border-right:10px solid #fff;
+                        }
+                    }
+
+                    .wrapper-2 {
+                        margin-bottom: 5px;
+
+                        .msg{
+                            width: fit-content;
+                            height: 100%;
+                            min-width: 300px;
+                            line-height: 50px;
+                            border: 1px solid lightgreen;
+                            position: relative;
+                            padding-left: 20px;
+                            border-radius: 10px;
+                            filter: drop-shadow(0 0 2px #999);
+                            background: #fff;
+                        }
+
+                        .msg::before{
+                            content: '';
+                            position: absolute;
+                            right: -10px;
+                            top: 30px;
+                            border-top: 6px solid transparent;
+                            border-bottom: 6px solid transparent;
+                            border-right:10px solid lightgreen;
+                            transform: rotate(180deg);
+                        }
+                        
+                        .msg::after{
+                            content: '';
+                            position: absolute;
+                            right: -8px;
+                            top: 30px;
+                            border-top: 6px solid transparent;
+                            border-bottom: 6px solid transparent;
+                            border-right:10px solid #fff;
+                            transform: rotate(180deg);
                         }
                     }
                 }
@@ -225,7 +261,7 @@
                 // align-self: flex-end;
 
                 input {
-                    width: 85%;
+                    width: 90%;
                     height: 56px;
                     border-width: 2px;
                     border-radius: 10px;
@@ -249,6 +285,7 @@
                     position: absolute;
                     
                     svg {
+                        color:rgb(0, 174, 216);
                         width: 100%;
                         display: flex;
                         justify-self: center;
@@ -256,9 +293,13 @@
                 }
 
                 div:hover {
-                    color: rgb(0, 174, 216);
                     cursor: pointer;
+
+                    :first-child {
+                        color: aqua;
+                    }
                 }
+
             }
         }
 

@@ -1,61 +1,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap');
 
-
-
 .login-page {
 	background-image: url('../../imgs/background_edu.png');
-	height: 100%;
+	height: 100vh;
 	font-size: 14px;
+}
 
-	.brand {
-		width: 90px;
-		height: 90px;
-		overflow: hidden;
-		border-radius: 50%;
-		margin: 40px auto;
-		box-shadow: 0 4px 8px rgba(0,0,0,.05);
-		position: relative;
+.login-page .brand {
+	width: 90px;
+	height: 90px;
+	overflow: hidden;
+	border-radius: 50%;
+	margin: 40px auto;
+	box-shadow: 0 4px 8px rgba(0,0,0,.05);
+	position: relative;
+}
 
-		img {
-			width: 100%;
-		}
-	}
+.login-page .brand img {
+	width: 100%;
+}
 
-	.row.justify-content-md-center.h-100 {
-		height: 100vh;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		position: relative;
-	}
+.login-page .card-wrapper {
+	width: 400px;
+}
 
-	.card-wrapper {
-		width: 400px;
-		position: absolute;
-		
-	
-		.card {
-			border-color: transparent;
-			box-shadow: 0 4px 8px rgba(0,0,0,.05);
-			width: 100%;
-
-			.fat {
-					height: 350px;
-					padding: 10px;
-
-					background-color: #f0f0f0;
-					border-radius: 10px;
-					border-color: black;
-					border-width: 3px;
-			}
-		}
-	}
+.login-page .card {
+	border-color: transparent;
+	box-shadow: 0 4px 8px rgba(0,0,0,.05);
 }
 
 .login-page .card.fat {
 	height: 350px;
 	padding: 10px;
-
+	margin-top: 100px;
 	background-color: #f0f0f0;
 	border-radius: 10px;
 	border-color: black;
@@ -63,8 +40,8 @@
 }
 
 .login-page .card-body {
-	// margin-bottom: 100px;
-	margin-top: 180px;
+	margin-bottom: 100px;
+	margin-top: 120px;
 }
 
 .login-page .card-body .card-title-container{
@@ -74,14 +51,13 @@
 }
 
 .login-page .card .card-title {
-	// bottom: 200px;
-	top: 20px;
+	bottom: 200px;
 	width: 102px;
 	height: 127px;
-	margin: 0;
 	background-image: url('../../imgs/logo_utec.png');
 	background-repeat: no-repeat;
-	position: absolute;	
+	position: absolute;
+	
 }
 
 .login-page .form-control {
@@ -108,10 +84,6 @@
 	position: relative;
 }
 
-input {
-	width: auto;
-	right: 0;
-}
 
 input[type=text] {
 	border-color: black;

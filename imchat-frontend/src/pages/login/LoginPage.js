@@ -58,8 +58,8 @@ const LoginPage=({loading,error,...props})=>{
     console.log("Loading ", loading);
 
     return (
-        <div className="login-page">
-            {/* <section className="h-100"> */}
+        <div className="login-page">                   
+            <section className="h-100">
                 <div className="container h-100">
                     <div className="row justify-content-md-center h-100">
                         <div className="card-wrapper">
@@ -80,7 +80,9 @@ const LoginPage=({loading,error,...props})=>{
 
                                         <div className="form-group">
                                             <label>Password
-
+                                                {/* <a href="forgot.html" className="float-right">
+                                                    Forgot Password?
+                                                </a> */}
                                             </label>
                                             <input id="password" type="password" className="form-control" minLength={4} value={values.password} onChange={handleChange} name="password" required/>
                                             <div className="invalid-feedback">
@@ -90,6 +92,15 @@ const LoginPage=({loading,error,...props})=>{
 
                                         <div className="form-group">
                                             <div className="custom-control custom-checkbox">
+                                                {
+                                                    /*
+                                                    <input type="checkbox" className="custom-control-input" id="customCheck1" />
+                                                    <label className="custom-control-label" htmlFor="customCheck1">Remember me</label>
+                                                    */
+                                                }
+                                                {/* <a className="float-right" href="/register">
+                                                    Register
+                                                </a> */}
                                             </div>
                                         </div>
 
@@ -105,6 +116,12 @@ const LoginPage=({loading,error,...props})=>{
                                                     aria-hidden="true"
                                                 />
                                                 )}
+                                                {/* <ClipLoader
+                                                //css={override}
+                                                size={20}
+                                                color={"#123abc"}
+                                                loading={loading}
+                                                /> */}
                                             </button>
                                             <button id="register-btn" type="submit" className="btn btn-primary">
                                                 Register
@@ -131,7 +148,7 @@ const LoginPage=({loading,error,...props})=>{
                         </div>
                     </div>
                 </div>
-            {/* </section> */}
+            </section>
         </div>
     )
     
