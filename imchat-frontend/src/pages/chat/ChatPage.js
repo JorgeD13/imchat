@@ -4,6 +4,8 @@ import * as RiIcons from "react-icons/ri";
 import * as IoIcons from "react-icons/io5";
 import './ChatPage.scss';
 import { Last } from "react-bootstrap/esm/PageItem";
+import { getValue } from "@testing-library/user-event/dist/utils";
+import { waitFor } from "@testing-library/react";
 
 
 const Contact=(props)=>{
@@ -18,6 +20,7 @@ const Contact=(props)=>{
         return (
             <div className="user" style={{backgroundColor: "gray"}}>
                 <div className="name">
+                    {console.log(props.slice[0][0])}
                     {props.name}
                 </div>
                 <div className="last-message">
@@ -41,14 +44,6 @@ const Contact=(props)=>{
 
 const Textbox=(props)=>{
     const me = props.other != props.sender;
-
-    const msg_other = {
-        
-    };
-
-    const msg_me = {
-
-    };
     
     if (me) {
         return (
@@ -72,45 +67,67 @@ const Textbox=(props)=>{
     )
 }
 
+const ChatMsg=(props)=>{
+    return (
+        <div className="chat-msg">
+            {props.filteredData[props.actual].messages.map((element, item) => {
+                return(
+                <React.Fragment key={item}>
+                    <Textbox msg={element[0]} sender={element[2]} other={props.filteredData[props.actual].user}>
+
+                    </Textbox>
+                </React.Fragment>
+                )
+            })}
+        </div>
+    );
+}
+
+var p = [
+    {
+        user: "usuario1",
+        messages: [["holaaa", "1666710185550", "usuario1"], ["como estas", "1666710185550", "usuario1"], ["jelou", "1666710185550", "usuario0"], ["jelou", "1666710185550", "usuario1"], ["jelou", "1666710185550", "usuario1"], ["jelou", "1666710185550", "usuario0"], ["jelou", "1666710185550", "usuario1"], ["jelou", "1666710185550", "usuario1"], ["jelou", "1666710185550", "usuario1"]]
+    },
+    {
+        user: "usuario2",
+        messages: [["buenas", "1666710185550", "usuario2"], ["tas bien?", "1666710185550", "usuario2"]]
+    },
+    {
+        user: "usuario3",
+        messages: [["hola", "1666710185550", "usuario3"], ["como estas", "1666710185550", "usuario0"]]
+    },
+    {
+        user: "usuario4",
+        messages: [["buenas", "1666710185550", "usuario0"], ["tas bien?", "1666710185550", "usuario0"]]
+    },
+    {
+        user: "usuario5",
+        messages: [["buenas", "1666710185550", "usuario5"], ["tas bien?", "1666710185550", "usuario5"]]
+    },
+    {
+        user: "usuario6",
+        messages: [["buenas", "1666710185550", "usuario0"], ["tas bien?", "1666710185550", "usuario0"]]
+    },
+    {
+        user: "usuario7",
+        messages: [["buenas", "1666710185550", "usuario0"], ["tas bien?", "1666710185550", "usuario0"]]
+    },
+    {
+        user: "usuario8",
+        messages: [["buenas", "1666710185550", "usuario8"], ["tas bien?", "1666710185550", "usuario8"]]
+    }
+];
+
 const ChatPage=()=>{
     // const [chat, setChat] = useState();
 
     useEffect(() => {
         setData(
-            [
-                {
-                    user: "usuario1",
-                    messages: [["holaaa", "\"2014-01-01T23:28:56.782Z\"", "usuario1"], ["como estas", "\"2014-01-01T23:28:56.782Z\"", "usuario1"], ["jelou", "\"2014-01-01T23:28:56.782Z\"", "usuario0"], ["jelou", "\"2014-01-01T23:28:56.782Z\"", "usuario1"], ["jelou", "\"2014-01-01T23:28:56.782Z\"", "usuario1"], ["jelou", "\"2014-01-01T23:28:56.782Z\"", "usuario0"], ["jelou", "\"2014-01-01T23:28:56.782Z\"", "usuario1"], ["jelou", "\"2014-01-01T23:28:56.782Z\"", "usuario1"], ["jelou", "\"2014-01-01T23:28:56.782Z\"", "usuario1"]]
-                },
-                {
-                    user: "usuario2",
-                    messages: [["buenas", "\"2014-01-01T23:28:56.782Z\"", "usuario2"], ["tas bien?", "\"2014-01-01T23:28:56.782Z\"", "usuario2"]]
-                },
-                {
-                    user: "usuario3",
-                    messages: [["hola", "\"2014-01-01T23:28:56.782Z\"", "usuario3"], ["como estas", "\"2014-01-01T23:28:56.782Z\"", "usuario0"]]
-                },
-                {
-                    user: "usuario4",
-                    messages: [["buenas", "\"2014-01-01T23:28:56.782Z\"", "usuario0"], ["tas bien?", "\"2014-01-01T23:28:56.782Z\"", "usuario0"]]
-                },
-                {
-                    user: "usuario5",
-                    messages: [["buenas", "\"2014-01-01T23:28:56.782Z\"", "usuario5"], ["tas bien?", "\"2014-01-01T23:28:56.782Z\"", "usuario5"]]
-                },
-                {
-                    user: "usuario6",
-                    messages: [["buenas", "\"2014-01-01T23:28:56.782Z\"", "usuario0"], ["tas bien?", "\"2014-01-01T23:28:56.782Z\"", "usuario0"]]
-                },
-                {
-                    user: "usuario7",
-                    messages: [["buenas", "\"2014-01-01T23:28:56.782Z\"", "usuario0"], ["tas bien?", "\"2014-01-01T23:28:56.782Z\"", "usuario0"]]
-                },
-                {
-                    user: "usuario8",
-                    messages: [["buenas", "\"2014-01-01T23:28:56.782Z\"", "usuario8"], ["tas bien?", "\"2014-01-01T23:28:56.782Z\"", "usuario8"]]
-                }
-            ]
+            p
+        );
+
+        setFilteredData(
+            p
         );
 
     }, []);
@@ -120,15 +137,52 @@ const ChatPage=()=>{
         messages: [["", "", ""]]
     }]);
 
+    const [filteredData, setFilteredData] = useState([{
+        user: "",
+        messages: [["", "", ""]]
+    }]);
+
+    const [update, setUpdate] = useState(0);
+
     useEffect(() => {
         setActual(0);
-    }, [])
+    }, []);
 
     const [actual, setActual] = useState(0);
 
     const handleClick = (i) => {
         setActual(i);
-        console.log(i);
+    }
+
+    const handleSearch = (e) => {
+        // filtar:
+        if (e == " ") {
+            setFilteredData(data);
+        } else {
+            const dataToAssign = data.filter(d => d.user.includes(e));
+            if (dataToAssign.length != 0) {
+                setFilteredData(
+                    dataToAssign
+                );
+            }
+        }
+    }
+
+    const handleClickSubmit = () => {
+        let msg = document.getElementById("msg-input").value;
+
+        if (msg != "") {
+            setUpdate(1);
+            console.log(actual);
+            let fecha = Date.now();
+            let user = "user0";   // cuando haya login, se recupera esta info de la sesión
+            const cdata = p;
+            cdata[actual].messages.push([msg, fecha, user]);
+            setData(cdata);
+            setFilteredData(data);
+            // handleClick(actual);
+            setUpdate(0);
+        }
     }
 
     return (
@@ -136,7 +190,7 @@ const ChatPage=()=>{
             {/* header */}
             <div className="navbar">
                 <div className="search">
-                    <input type="text" placeholder="Buscar" />
+                    <input type="text" placeholder="Buscar" onKeyUp={(event) => handleSearch(event.target.value)} />
                     <div><BiIcons.BiSearchAlt/></div>
                     {/* <a>hola</a> */}
                 </div>
@@ -149,14 +203,14 @@ const ChatPage=()=>{
             <div className="body">
                 <div className="contacts">
                     {
-                    data.map((element, item) => {
+                    filteredData.map((element, item) => {
                         // console.log(element);
                         // {console.log(item)}
                         // console.log(data.indexOf(item));
                         return(
                             <React.Fragment key={item}>
                             <div onClick={() => handleClick(item)}>
-                                <Contact name={element.user} msg={element.messages[element.messages.length-1][0]} id={item} actual={actual}>
+                                <Contact name={element.user} msg={element.messages[element.messages.length-1][0]} id={item} actual={actual} slice={element.messages.slice(-1)}>
                                 
                                 </Contact>
                             </div>
@@ -165,20 +219,12 @@ const ChatPage=()=>{
                     })}
                 </div>
                 <div className="chat">
-                    <div className="chat-msg">
-                        {data[actual].messages.map((element, item) => {
-                            return(
-                            <React.Fragment key={item}>
-                                <Textbox msg={element[0]} sender={element[2]} other={data[actual].user}>
+                    <ChatMsg filteredData={filteredData} actual={actual} update={update}>
 
-                                </Textbox>
-                            </React.Fragment>
-                            )
-                        })}
-                    </div>
+                    </ChatMsg>
                     <div className="text-bar">
-                        <input type="text" placeholder="Escribe un mensaje" />
-                        <div><IoIcons.IoSend /></div>
+                        <input id="msg-input" type="text" placeholder="Escribe un mensaje" />
+                        <div onClick={() => handleClickSubmit()}><IoIcons.IoSend/></div>
                     </div>
                 </div>
             </div>
