@@ -11,7 +11,7 @@ export default function Register() {
   const navigate = useNavigate();
   const toastOptions = {
     position: "bottom-right",
-    autoClose: 8000,
+    autoClose: 5000,
     pauseOnHover: true,
     draggable: true,
     theme: "dark",
@@ -22,7 +22,7 @@ export default function Register() {
     phone: "",
     password: "",
     confirmPassword: "",
-    public_key: "public12345678"
+    public_key: Date.now()
   });
 
   useEffect(() => {
@@ -63,31 +63,31 @@ export default function Register() {
     return true;
   };
 
-  const handleSubmit = async (event) => {
+  async function handleSubmit (event) {
     event.preventDefault();
     if (handleValidation()) {
       const { phone, username, password, public_key } = values;
-      const { data } = await axios.post(registerRoute, {
+      let data = await axios.post(registerRoute, {
         username,
         phone,
         password,
         public_key
       })
-
-      console.log(data);
-      console.log(data.status);
-
+    
       if (data.status !== 201) {
-        toast.error(data.msg, toastOptions);
+        console.log(11);
+        toast.error("Status 201!", toastOptions);
       }
       if (data.status === 201) {
-        toast.success(data.msg, toastOptions);
-        console.log(1);
+        setTimeout(function(){
+          navigate("/")
+        }, 6000);
+        toast.success("User created! Redirectioning...", toastOptions);
         localStorage.setItem(
           process.env.REACT_APP_LOCALHOST_KEY,
-          JSON.stringify(data.user)
+          JSON.stringify(data.data.username)
         );
-        navigate("/");
+        
       }
     }
   };
@@ -137,8 +137,8 @@ export default function Register() {
 }
 
 const FormContainer = styled.div`
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
