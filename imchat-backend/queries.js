@@ -15,7 +15,8 @@ const createUser = (request, response) => {
   
     client.query('INSERT INTO imchat.user (username, password, phone, public_key) VALUES ($1, $2, $3, $4) RETURNING *', [username, password, phone, public_key], (error, results) => {
         if (error) throw error;
-        response.status(201).send(`User added with ID: ${results.rows[0].id}`)
+        // response.status(201).send(`User added with ID: ${results.rows[0].id}`)
+        response.status(201).json(results);
     })
 }
 

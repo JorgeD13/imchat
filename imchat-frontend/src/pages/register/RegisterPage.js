@@ -17,16 +17,12 @@ export default function Register() {
     theme: "dark",
   };
 
-  const [data, setData] = useState({
-    username: ""
-  })
-
   const [values, setValues] = useState({
     username: "",
     phone: "",
     password: "",
     confirmPassword: "",
-    public_key: "public1"
+    public_key: "public12345678"
   });
 
   useEffect(() => {
@@ -76,20 +72,17 @@ export default function Register() {
         phone,
         password,
         public_key
-      }).then((response) => {
-        console.log(response);
-        setData(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
       })
 
       console.log(data);
+      console.log(data.status);
 
-      if (data.status === false) {
+      if (data.status !== 201) {
         toast.error(data.msg, toastOptions);
       }
-      if (data.status === true) {
+      if (data.status === 201) {
+        toast.success(data.msg, toastOptions);
+        console.log(1);
         localStorage.setItem(
           process.env.REACT_APP_LOCALHOST_KEY,
           JSON.stringify(data.user)
