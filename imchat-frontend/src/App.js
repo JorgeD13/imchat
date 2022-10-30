@@ -1,8 +1,8 @@
 import {
   BrowserRouter,
-  Switch,
+  Routes,
   Route,
-  Redirect
+  Navigate
 } from "react-router-dom";
 
 import LoginPage from './pages/login/LoginPage';
@@ -12,12 +12,12 @@ import RegisterPage from './pages/register/RegisterPage'
 function App() {
   return (
     <BrowserRouter>
-      <Switch>
-        <Route exact path="/login" component={LoginPage} />
-        <Route exact path="/chat" component={ChatPage} />
-        <Route exact path="register" component={RegisterPage} />
-        <Redirect to="/login" />
-      </Switch>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/chat" element={<ChatPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
     </BrowserRouter>
   );
 }

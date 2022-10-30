@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styled from "styled-components";
 import { useNavigate, Link } from "react-router-dom";
-import Logo from "../assets/logo.svg";
+//import Logo from "../assets/logo.svg";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { registerRoute } from "../utils/APIRoutes";
+import { registerRoute } from "../../utils/APIRoutes";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -16,11 +16,17 @@ export default function Register() {
     draggable: true,
     theme: "dark",
   };
+
+  const [data, setData] = useState({
+    username: ""
+  })
+
   const [values, setValues] = useState({
     username: "",
-    email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
+    public_key: "public1"
   });
 
   useEffect(() => {
@@ -34,7 +40,7 @@ export default function Register() {
   };
 
   const handleValidation = () => {
-    const { password, confirmPassword, username, email } = values;
+    const { password, confirmPassword, username, phone } = values;
     if (password !== confirmPassword) {
       toast.error(
         "Password and confirm password should be same.",
@@ -53,8 +59,8 @@ export default function Register() {
         toastOptions
       );
       return false;
-    } else if (email === "") {
-      toast.error("Email is required.", toastOptions);
+    } else if (phone === "") {
+      toast.error("phone is required.", toastOptions);
       return false;
     }
 
@@ -64,12 +70,21 @@ export default function Register() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (handleValidation()) {
-      const { email, username, password } = values;
+      const { phone, username, password, public_key } = values;
       const { data } = await axios.post(registerRoute, {
         username,
-        email,
+        phone,
         password,
-      });
+        public_key
+      }).then((response) => {
+        console.log(response);
+        setData(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+
+      console.log(data);
 
       if (data.status === false) {
         toast.error(data.msg, toastOptions);
@@ -99,9 +114,10 @@ export default function Register() {
             onChange={(e) => handleChange(e)}
           />
           <input
-            type="email"
-            placeholder="Email"
-            name="email"
+            type="tel"
+            placeholder="Phone"
+            name="phone"
+            pattern="[1-9]{1}[0-9]{8}" required
             onChange={(e) => handleChange(e)}
           />
           <input

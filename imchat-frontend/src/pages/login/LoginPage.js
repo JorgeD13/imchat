@@ -4,7 +4,7 @@ import { authenticate, authFailure, authSuccess } from '../../redux/authActions'
 import './LoginPage.scss';
 import {userLogin} from '../../api/authenticationService';
 import {Alert,Spinner} from 'react-bootstrap';
-import Button from 'react-bootstrap/Button';
+// import Button from 'react-bootstrap/Button';
 // import store from '../../redux/store'
 
 const LoginPage=({loading,error,...props})=>{
@@ -66,7 +66,7 @@ const LoginPage=({loading,error,...props})=>{
                             <div className="card fat">
                                 <div className="card-body">
                                     <div className="card-title-container">
-                                        <h4 className="card-title"></h4>
+                                        { <h4 className="card-title"></h4> }
                                     </div>
                                     <form className="my-login-validation" onSubmit={handleSubmit} noValidate={false}>
 
@@ -80,9 +80,9 @@ const LoginPage=({loading,error,...props})=>{
 
                                         <div className="form-group">
                                             <label>Password
-                                                {/* <a href="forgot.html" className="float-right">
+                                                { <a href="forgot.html" className="float-right">
                                                     Forgot Password?
-                                                </a> */}
+                                                </a> }
                                             </label>
                                             <input id="password" type="password" className="form-control" minLength={4} value={values.password} onChange={handleChange} name="password" required/>
                                             <div className="invalid-feedback">

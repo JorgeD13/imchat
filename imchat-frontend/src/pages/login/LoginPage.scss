@@ -2,6 +2,8 @@
 
 .login-page {
 	background-image: url('../../imgs/background_edu.png');
+	background-repeat: no-repeat;
+	background-size: cover;
 	height: 100vh;
 	font-size: 14px;
 }
@@ -22,17 +24,22 @@
 
 .login-page .card-wrapper {
 	width: 400px;
+	// display: flex;
+	// justify-content: center;
+	// align-items: center;
 }
 
 .login-page .card {
 	border-color: transparent;
 	box-shadow: 0 4px 8px rgba(0,0,0,.05);
+	// align-items: center;
+	// justify-content: center;
 }
 
 .login-page .card.fat {
 	height: 350px;
 	padding: 10px;
-	margin-top: 100px;
+	margin-top: 30%;
 	background-color: #f0f0f0;
 	border-radius: 10px;
 	border-color: black;
@@ -56,6 +63,7 @@
 	height: 127px;
 	background-image: url('../../imgs/logo_utec.png');
 	background-repeat: no-repeat;
+	// background-attachment: fixed;
 	position: absolute;
 	
 }
