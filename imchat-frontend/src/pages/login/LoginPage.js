@@ -1,50 +1,62 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
+import axios from "axios";
 import { connect } from 'react-redux';
 import { authenticate, authFailure, authSuccess } from '../../redux/authActions';
-import './LoginPage.scss';
-import {userLogin} from '../../api/authenticationService';
+import { userLogin } from '../../api/authenticationService';
 import {Alert,Spinner} from 'react-bootstrap';
-// import Button from 'react-bootstrap/Button';
+import { codeRoute, loginRoute } from "../../utils/APIRoutes";
+import CryptoJS from 'crypto-js';
+import { toast } from "react-toastify";
 // import store from '../../redux/store'
+
+import './LoginPage.scss';
 
 const LoginPage=({loading,error,...props})=>{
 
+    const [flag, setFlag] = useState(1);
+
     const [values, setValues] = useState({
-        userName: '',
+        username: '',
         password: ''
-        });
+    });
 
-    const handleSubmit=(evt)=>{
+    const [code, setCode] = useState(0);
+    const [phone, setPhone] = useState(0);
+
+    useEffect = () =>{
+        setValues(
+            {
+                username: '',
+                password: ''
+            }
+        );
+        setCode(123456);
+        setPhone(999999999);
+        setFlag(1);
+    }
+
+    async function handleSubmit (evt) {
         evt.preventDefault();
-        props.authenticate();
+        // props.authenticate();
 
-        console.log("LOCAL STORE", localStorage);
+        console.log("LOCAL STORE: ", localStorage);
 
-        userLogin(values).then((response)=>{
-
-            console.log("response",response);
-            if (response.status===200) {
-                props.setUser(response.data);
-                props.history.push('/home');
-            } else {
-               props.loginFailure('Something Wrong!Please Try Again'); 
-            }
-        }).catch((err)=>{
-
-            if (err && err.response) {
-                switch(err.response.status) {
-                    case 401:
-                        console.log("401 status");
-                        props.loginFailure("Authentication Failed.Bad Credentials");
-                        break;
-                    default:
-                        props.loginFailure('Something Wrong!Please Try Again');
-                }
-            } else {
-                props.loginFailure('Something Wrong!Please Try Again');
-            }
+        const {username, password} = values;
+        console.log(values);
+        var ePassword = CryptoJS.SHA256(password);
+        let data = await axios.post(loginRoute, {
+            username,
+            password: ePassword.toString(CryptoJS.enc.Hex)
         });
-        //console.log("Loading again",loading);
+        console.log(1);
+        if (data.status === 200) {
+            setPhone(data.data.phone);
+            console.log("Sesion creada!");
+            console.log(data);
+            setFlag(0);
+        } else {
+            toast.error("Status Error! Try Again.")
+        }
     }
 
     const handleChange=(e)=>{
@@ -55,7 +67,30 @@ const LoginPage=({loading,error,...props})=>{
         }));
     };
 
-    console.log("Loading ", loading);
+    async function handleCodeSubmit(evt) {
+        evt.preventDefault();
+
+        // console.log("LOCAL STORE: ", localStorage);
+
+        console.log(code);
+        let data = await axios.post(codeRoute, {
+            code,
+            phone
+        });
+
+        if (data.status === 200) {
+            console.log("Codigo correcto!");
+            console.log(data);
+        } else {
+            toast.error("Status Error! Try Again.")
+        }
+    }
+
+    const handleCodeChange=(e)=>{
+        e.persist();
+        setCode(e.target.value);
+        console.log(phone);
+    }
 
     return (
         <div className="login-page">                   
@@ -68,11 +103,13 @@ const LoginPage=({loading,error,...props})=>{
                                     <div className="card-title-container">
                                         { <h4 className="card-title"></h4> }
                                     </div>
+                                    {
+                                    flag ? 
                                     <form className="my-login-validation" onSubmit={handleSubmit} noValidate={false}>
 
                                         <div className="form-group">
-                                            <label htmlFor="email">Username</label>
-                                            <input id="username" type="text" className="form-control" minLength={5} value={values.userName} onChange={handleChange} name="userName" required />
+                                            <label>Username</label>
+                                            <input id="username" type="text" className="form-control" minLength={5} value={values.username} onChange={handleChange} name="username" required />
                                                 <div className="invalid-feedback">
                                                     UserId is invalid
                                                 </div>                                            
@@ -87,20 +124,6 @@ const LoginPage=({loading,error,...props})=>{
                                             <input id="password" type="password" className="form-control" minLength={4} value={values.password} onChange={handleChange} name="password" required/>
                                             <div className="invalid-feedback">
                                                 Password is required
-                                            </div>
-                                        </div>
-
-                                        <div className="form-group">
-                                            <div className="custom-control custom-checkbox">
-                                                {
-                                                    /*
-                                                    <input type="checkbox" className="custom-control-input" id="customCheck1" />
-                                                    <label className="custom-control-label" htmlFor="customCheck1">Remember me</label>
-                                                    */
-                                                }
-                                                {/* <a className="float-right" href="/register">
-                                                    Register
-                                                </a> */}
                                             </div>
                                         </div>
 
@@ -138,9 +161,23 @@ const LoginPage=({loading,error,...props})=>{
                                         </div>
 
                                     </form>
+                                        :
+                                    <form className="CODE-VALIDATION" onSubmit={handleCodeSubmit}>
+                                        <div className="form-group">
+                                            <label>CODE</label>
+                                            <input id="code" type="text" className="form-control" minLength={5} value={code} onChange={handleCodeChange} name="code" />
+                                                <div className="invalid-feedback">
+                                                    UserId is invalid
+                                                </div>                                            
+                                        </div>
+                                        <button id="code-btn" type="sumbit" className="btn btn-primary">
+                                            Send code!
+                                        </button>
+                                    </form>
+                                    }
                                     { error &&
                                     <Alert style={{marginTop:'20px'}} variant="danger">
-                                            {error}
+                                        {error}
                                     </Alert>
                                     }
                                 </div>
@@ -150,8 +187,7 @@ const LoginPage=({loading,error,...props})=>{
                 </div>
             </section>
         </div>
-    )
-    
+    );
 }
 
 const mapStateToProps=({auth})=>{

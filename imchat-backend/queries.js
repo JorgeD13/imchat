@@ -1,13 +1,4 @@
-const {Client} = require('pg')
 
-const client = new Client({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
-    database: process.env.DB_NAME
-})
-client.connect();
 
 const createUser = (request, response) => {
     console.log(request.body);
@@ -21,7 +12,7 @@ const createUser = (request, response) => {
 }
 
 const getUsers = (request, response) => {
-    client.query('SELECT * FROM imchat.users ORDER BY id ASC', (error, results) => {
+    client.query('SELECT * FROM imchat.user ORDER BY id ASC', (error, results) => {
         if (error) throw error;
         response.status(200).json(results.rows);
     })
@@ -30,7 +21,18 @@ const getUsers = (request, response) => {
 const getUserById = (request, response) => {
     const id = parseInt(request.params.id)
   
-    client.query('SELECT * FROM imchat.users WHERE id = $1', [id], (error, results) => {
+    client.query('SELECT * FROM imchat.user WHERE id = $1', [id], (error, results) => {
+        if (error) throw error
+        response.status(200).json(results.rows)
+    })
+}
+
+const getUserByUsername = (request, response) => {
+    const username = request.params.username;
+    const password = request.params.username;
+    console.log(request.params);
+
+    client.query('SELECT * FROM imchat.user WHERE username = $1', [username], (error, results) => {
         if (error) throw error
         response.status(200).json(results.rows)
     })
@@ -39,6 +41,7 @@ const getUserById = (request, response) => {
 module.exports = {
     getUsers,
     getUserById,
+    getUserByUsername,
     createUser
     // updateUser,
     // deleteUser,

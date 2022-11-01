@@ -18,6 +18,11 @@
 	position: relative;
 }
 
+.login-page .h-100 {
+    justify-content: center;
+    align-items: center;
+}
+
 .login-page .brand img {
 	width: 100%;
 }
@@ -39,7 +44,6 @@
 .login-page .card.fat {
 	height: 350px;
 	padding: 10px;
-	margin-top: 30%;
 	background-color: #f0f0f0;
 	border-radius: 10px;
 	border-color: black;

@@ -1,205 +1,169 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import styled from "styled-components";
 import { useNavigate, Link } from "react-router-dom";
-//import Logo from "../assets/logo.svg";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { registerRoute } from "../../utils/APIRoutes";
+import { ToastContainer, toast } from "react-toastify";
+import CryptoJS from 'crypto-js';
+import "react-toastify/dist/ReactToastify.css";
+import "./RegisterPage.scss";
 
 export default function Register() {
-  const navigate = useNavigate();
-  const toastOptions = {
-    position: "bottom-right",
-    autoClose: 5000,
-    pauseOnHover: true,
-    draggable: true,
-    theme: "dark",
-  };
+    const navigate = useNavigate();
+    const toastOptions = {
+        position: "bottom-right",
+        autoClose: 5000,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "dark",
+    };
 
-  const [values, setValues] = useState({
-    username: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-    public_key: Date.now()
-  });
+    const [values, setValues] = useState({
+        username: "",
+        phone: "",
+        password: "",
+        confirmPassword: "",
+        public_key: Date.now()
+    });
 
-  useEffect(() => {
+
+    useEffect(() => {
     if (localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
-      navigate("/");
+        // navigate("/");
     }
-  }, []);
+    }, []);
 
-  const handleChange = (event) => {
-    setValues({ ...values, [event.target.name]: event.target.value });
-  };
+    const handleChange = (event) => {
+        setValues({ ...values, [event.target.name]: event.target.value, public_key: Date.now() });
+    };
 
-  const handleValidation = () => {
-    const { password, confirmPassword, username, phone } = values;
-    if (password !== confirmPassword) {
-      toast.error(
-        "Password and confirm password should be same.",
-        toastOptions
-      );
-      return false;
-    } else if (username.length < 3) {
-      toast.error(
-        "Username should be greater than 3 characters.",
-        toastOptions
-      );
-      return false;
-    } else if (password.length < 8) {
-      toast.error(
-        "Password should be equal or greater than 8 characters.",
-        toastOptions
-      );
-      return false;
-    } else if (phone === "") {
-      toast.error("phone is required.", toastOptions);
-      return false;
-    }
-
-    return true;
-  };
-
-  async function handleSubmit (event) {
-    event.preventDefault();
-    if (handleValidation()) {
-      const { phone, username, password, public_key } = values;
-      let data = await axios.post(registerRoute, {
-        username,
-        phone,
-        password,
-        public_key
-      })
-    
-      if (data.status !== 201) {
-        console.log(11);
-        toast.error("Status 201!", toastOptions);
-      }
-      if (data.status === 201) {
-        setTimeout(function(){
-          navigate("/")
-        }, 6000);
-        toast.success("User created! Redirectioning...", toastOptions);
-        localStorage.setItem(
-          process.env.REACT_APP_LOCALHOST_KEY,
-          JSON.stringify(data.data.username)
+    const handleValidation = () => {
+        const { password, confirmPassword, username, phone } = values;
+        if (password !== confirmPassword) {
+        toast.error(
+            "Password and confirm password should be same.",
+            toastOptions
         );
-        
-      }
-    }
-  };
+        return false;
+        } else if (username.length < 3) {
+        toast.error(
+            "Username should be greater than 3 characters.",
+            toastOptions
+        );
+        return false;
+        } else if (password.length < 8) {
+        toast.error(
+            "Password should be equal or greater than 8 characters.",
+            toastOptions
+        );
+        return false;
+        } else if (phone === "") {
+        toast.error("phone is required.", toastOptions);
+        return false;
+        }
 
-  return (
-    <>
-      <FormContainer>
-        <form action="" onSubmit={(event) => handleSubmit(event)}>
-          <div className="brand">
-            {/* <img src={Logo} alt="logo" /> */}
-            <h1>snappy</h1>
-          </div>
-          <input
-            type="text"
-            placeholder="Username"
-            name="username"
-            onChange={(e) => handleChange(e)}
-          />
-          <input
-            type="tel"
-            placeholder="Phone"
-            name="phone"
-            pattern="[1-9]{1}[0-9]{8}" required
-            onChange={(e) => handleChange(e)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            name="password"
-            onChange={(e) => handleChange(e)}
-          />
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            name="confirmPassword"
-            onChange={(e) => handleChange(e)}
-          />
-          <button type="submit">Create User</button>
-          <span>
-            Already have an account ? <Link to="/login">Login.</Link>
-          </span>
-        </form>
-      </FormContainer>
-      <ToastContainer />
-    </>
-  );
+        return true;
+    };
+
+    async function handleSubmit (event) {
+        event.preventDefault();
+        if (handleValidation()) {
+        const { phone, username, password, public_key } = values;
+
+        var ePassword = CryptoJS.SHA256(password);
+        console.log(ePassword.toString(CryptoJS.enc.Hex));
+        
+        let data = await axios.post(registerRoute, {
+            username,
+            phone,
+            password: ePassword.toString(CryptoJS.enc.Hex),
+            public_key
+        })
+        console.log(data)
+        if (data.status !== 201) {
+            console.log(11);
+            toast.error("Status 201!", toastOptions);
+        }
+        if (data.status === 201) {
+            setTimeout(function(){
+            // navigate("/")
+            }, 6000);
+            toast.success("User created! Redirectioning...", toastOptions);
+            localStorage.setItem(
+            process.env.REACT_APP_LOCALHOST_KEY,
+            JSON.stringify(data.data.username)
+            );
+            
+        }
+        
+        }
+    };
+
+    return (
+        <div className="registration-page">
+            <section className="h-100">
+                <div className="container h-100">
+                    <div className="row justify-content-md-center h-100">
+                        <div className="card-wrapper">
+                            <div className="card fat">
+                                <div className="card-body">
+                                    <div className="card-title-container">
+                                    { <h4 className="card-title"></h4> }
+                                    </div>
+                                    <form className="my-registration-validation" action="" onSubmit={(event) => handleSubmit(event)}>
+                                        <div className="form-group">
+                                            <label>Username</label>
+                                            <input
+                                            className="form-control"
+                                            type="text"
+                                            name="username"
+                                            onChange={(e) => handleChange(e)}
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Phone Number</label>
+                                            <input
+                                            className="form-control"
+                                            type="tel"
+                                            name="phone"
+                                            pattern="[1-9]{1}[0-9]{8}" required
+                                            onChange={(e) => handleChange(e)}
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Password</label>
+                                            <input
+                                            className="form-control"
+                                            type="password"
+                                            name="password"
+                                            onChange={(e) => handleChange(e)}
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Confirm Password</label>
+                                            <input
+                                            className="form-control"
+                                            type="password"
+                                            name="confirmPassword"
+                                            onChange={(e) => handleChange(e)}
+                                            />
+                                        </div>
+
+                                        <div className="form-group-m-0">
+                                            <button id="register-btn" type="submit" className="btn btn-primary">
+                                                Register
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <ToastContainer />
+        </div>
+    );
 }
 
-const FormContainer = styled.div`
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1rem;
-  align-items: center;
-  background-color: #131324;
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    justify-content: center;
-    img {
-      height: 5rem;
-    }
-    h1 {
-      color: white;
-      text-transform: uppercase;
-    }
-  }
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    background-color: #00000076;
-    border-radius: 2rem;
-    padding: 3rem 5rem;
-  }
-  input {
-    background-color: transparent;
-    padding: 1rem;
-    border: 0.1rem solid #4e0eff;
-    border-radius: 0.4rem;
-    color: white;
-    width: 100%;
-    font-size: 1rem;
-    &:focus {
-      border: 0.1rem solid #997af0;
-      outline: none;
-    }
-  }
-  button {
-    background-color: #4e0eff;
-    color: white;
-    padding: 1rem 2rem;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 0.4rem;
-    font-size: 1rem;
-    text-transform: uppercase;
-    &:hover {
-      background-color: #4e0eff;
-    }
-  }
-  span {
-    color: white;
-    text-transform: uppercase;
-    a {
-      color: #4e0eff;
-      text-decoration: none;
-      font-weight: bold;
-    }
-  }
-`;

@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap');
+
+.registration-page {
+	background-image: url('../../imgs/background_edu.png');
+	background-repeat: no-repeat;
+	background-size: cover;
+	height: 100vh;
+	font-size: 14px;
+}
+
+.registration-page .brand {
+	width: 90px;
+	height: 90px;
+	overflow: hidden;
+	border-radius: 50%;
+	margin: 40px auto;
+	box-shadow: 0 4px 8px rgba(0,0,0,.05);
+	position: relative;
+}
+
+.registration-page .h-100 {
+    justify-content: center;
+    align-items: center;
+}
+
+.registration-page .brand img {
+	width: auto;
+    height: auto;
+}
+
+.registration-page .card-wrapper {
+	width: 500px;
+    height: fit-content;
+	// display: flex;
+	// justify-content: center;
+	// align-items: center;
+}
+
+.registration-page .card {
+	border-color: transparent;
+	box-shadow: 0 4px 8px rgba(0,0,0,.05);
+	// align-items: center;
+	justify-content: center;
+    align-items: center;
+}
+
+.registration-page .card.fat {
+	height: 500px;
+	padding: 10px;
+	// margin-top: 5%;
+    // margin-bottom: 5%;
+	background-color: #f0f0f0;
+	border-radius: 10px;
+	border-color: black;
+	border-width: 3px;
+}
+
+.registration-page .card-body {
+	// margin-bottom: 80px;
+	margin-top: 120px;
+}
+
+.registration-page .card-body .card-title-container{
+	// width: 354px;
+	display: flex;
+	justify-content: center;
+}
+
+.registration-page .card .card-title {
+	bottom: 200px;
+	width: 102px;
+	height: 127px;
+	background-image: url('../../imgs/logo_utec.png');
+	background-repeat: no-repeat;
+	// background-attachment: fixed;
+	position: absolute;
+    top: 20px;
+	
+}
+
+.registration-page .form-control {
+	border-width: 2.3px;
+}
+
+.registration-page .form-group label {
+	width: 100%;
+	font-family: 'Rubik', sans-serif;
+}
+
+.registration-page .btn.btn-block {
+	padding: 12px 10px;
+}
+
+.registration-page .footer {
+	margin: 40px 0;
+	color: #888;
+	text-align: center;
+}
+
+.registration-page .form-group-m-0 {
+	display: flex;
+	position: relative;
+}
+
+#register-btn {
+	position: absolute;
+	top: 10px;
+}
+
+.registration-page {
+    input[type=text], input[type=tel], input[type=password] {
+        border-color: black;
+        width: 400px;
+    }
+}
+
+@media screen and (max-width: 425px) {
+	.registration-page .card-wrapper {
+		width: 90%;
+		margin: 0 auto;
+	}
+}
+
+@media screen and (max-width: 320px) {
+	.registration-page .card.fat {
+		padding: 0;
+	}
+
+	.registration-page .card.fat .card-body {
+		padding: 15px;
+	}
+}
