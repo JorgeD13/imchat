@@ -81,6 +81,7 @@ const LoginPage=({loading,error,...props})=>{
         if (data.status === 200) {
             console.log("Codigo correcto!");
             console.log(data);
+            localStorage.setItem("USER", values.username);
         } else {
             toast.error("Status Error! Try Again.")
         }
@@ -190,22 +191,23 @@ const LoginPage=({loading,error,...props})=>{
     );
 }
 
-const mapStateToProps=({auth})=>{
-    console.log("state ",auth)
-    return {
-        loading:auth.loading,
-        error:auth.error
-}}
+// const mapStateToProps=({auth})=>{
+//     console.log("state ",auth)
+//     return {
+//         loading:auth.loading,
+//         error:auth.error
+// }}
 
 
-const mapDispatchToProps=(dispatch)=>{
+// const mapDispatchToProps=(dispatch)=>{
 
-    return {
-        authenticate :()=> dispatch(authenticate()),
-        setUser:(data)=> dispatch(authSuccess(data)),
-        loginFailure:(message)=>dispatch(authFailure(message))
-    }
-}
+//     return {
+//         authenticate :()=> dispatch(authenticate()),
+//         setUser:(data)=> dispatch(authSuccess(data)),
+//         loginFailure:(message)=>dispatch(authFailure(message))
+//     }
+// }
 
 
-export default connect(mapStateToProps,mapDispatchToProps)(LoginPage);
+// export default connect(mapStateToProps,mapDispatchToProps)(LoginPage);
+export default LoginPage;

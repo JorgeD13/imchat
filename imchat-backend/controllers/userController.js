@@ -73,6 +73,9 @@ module.exports.login = async (request, response, next) => {
 
 module.exports.verify = async (request, response, next) => {
   console.log(request.body);
+  return response.status(200).send({
+    message: "User is Verified!!!!!!!!!"
+}); // borrar
   if (request.body.phone && (request.body.code).length === 6) {
     await client
     .verify

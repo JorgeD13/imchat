@@ -195,7 +195,7 @@ const ChatPage=()=>{
                     {/* <a>hola</a> */}
                 </div>
                 <div className="username">
-                    <a>Jorge</a>
+                    <a>{localStorage.getItem("USER")}</a>
                     <div><RiIcons.RiDoorOpenFill /></div>
                 </div>
             </div>

@@ -6,8 +6,6 @@ const initialState={
     loading:false
 };
 
-
-
 const auth=(state=initialState,action)=>{
     console.log("Reducer auth");
     switch(action.type){
