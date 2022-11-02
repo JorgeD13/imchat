@@ -7,6 +7,15 @@ import CryptoJS from 'crypto-js';
 import "react-toastify/dist/ReactToastify.css";
 import "./RegisterPage.scss";
 
+function isValidPassword(str) {
+    var pattern = new RegExp(
+      "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[-+_!@#$%^&*.,?]).+$"
+    );
+
+    if (pattern.test(str)) return true;
+    return false;
+}
+
 export default function Register() {
     const navigate = useNavigate();
     const toastOptions = {
@@ -56,8 +65,14 @@ export default function Register() {
             toastOptions
         );
         return false;
+        } else if (!isValidPassword(password)) {
+        toast.error(
+            "Password should include uppercase (A, B, C), lowercase (a, b, c), numeric (1, 2, 3) and special (@, #, %) characters.",
+            toastOptions
+        );
+        return false;
         } else if (phone === "") {
-        toast.error("phone is required.", toastOptions);
+        toast.error("Phone number is required.", toastOptions);
         return false;
         }
 
