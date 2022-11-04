@@ -1,39 +1,42 @@
 import {useEffect, useState} from "react";
 import axios from "axios";
-import { connect } from 'react-redux';
 import { authenticate, authFailure, authSuccess } from '../../redux/authActions';
 import { userLogin } from '../../api/authenticationService';
 import {Alert,Spinner} from 'react-bootstrap';
 import { codeRoute, loginRoute } from "../../utils/APIRoutes";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import CryptoJS from 'crypto-js';
-import { toast } from "react-toastify";
-// import store from '../../redux/store'
-
 import './LoginPage.scss';
+import { useNavigate } from "react-router-dom";
 
-const LoginPage=({loading,error,...props})=>{
+export default function LoginPage(){
+    let navigate = useNavigate();
+    const toastOptions = {
+        position: "bottom-right",
+        autoClose: 5000,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "dark",
+    };
 
     const [flag, setFlag] = useState(1);
+    const [code, setCode] = useState(0);
+    const [phone, setPhone] = useState(0);
 
     const [values, setValues] = useState({
         username: '',
         password: ''
     });
 
-    const [code, setCode] = useState(0);
-    const [phone, setPhone] = useState(0);
-
-    useEffect = () =>{
-        setValues(
-            {
-                username: '',
-                password: ''
-            }
-        );
-        setCode(123456);
-        setPhone(999999999);
-        setFlag(1);
-    }
+    // useEffect = () =>{
+    //     setValues(
+    //         {
+    //             username: '',
+    //             password: ''
+    //         }
+    //     );
+    // }
 
     async function handleSubmit (evt) {
         evt.preventDefault();
@@ -82,8 +85,11 @@ const LoginPage=({loading,error,...props})=>{
             console.log("Codigo correcto!");
             console.log(data);
             localStorage.setItem("USER", values.username);
+            console.log(localStorage);
+            navigate("/chat");
         } else {
-            toast.error("Status Error! Try Again.")
+            // toast.error("Status Error! Try Again.");
+            console.log(1);
         }
     }
 
@@ -117,11 +123,7 @@ const LoginPage=({loading,error,...props})=>{
                                         </div>
 
                                         <div className="form-group">
-                                            <label>Password
-                                                { <a href="forgot.html" className="float-right">
-                                                    Forgot Password?
-                                                </a> }
-                                            </label>
+                                            <label>Password</label>
                                             <input id="password" type="password" className="form-control" minLength={4} value={values.password} onChange={handleChange} name="password" required/>
                                             <div className="invalid-feedback">
                                                 Password is required
@@ -131,33 +133,9 @@ const LoginPage=({loading,error,...props})=>{
                                         <div className="form-group-m-0">
                                             <button id="login-btn" type="submit" className="btn btn-primary">
                                                 Login
-                                                {loading && (
-                                                    <Spinner
-                                                    as="span"
-                                                    animation="border"
-                                                    size="sm"
-                                                    role="status"
-                                                    aria-hidden="true"
-                                                />
-                                                )}
-                                                {/* <ClipLoader
-                                                //css={override}
-                                                size={20}
-                                                color={"#123abc"}
-                                                loading={loading}
-                                                /> */}
                                             </button>
                                             <button id="register-btn" type="submit" className="btn btn-primary">
                                                 Register
-                                                {loading && (
-                                                    <Spinner
-                                                    as="span"
-                                                    animation="border"
-                                                    size="sm"
-                                                    role="status"
-                                                    aria-hidden="true"
-                                                />
-                                                )}
                                             </button>
                                         </div>
 
@@ -176,17 +154,13 @@ const LoginPage=({loading,error,...props})=>{
                                         </button>
                                     </form>
                                     }
-                                    { error &&
-                                    <Alert style={{marginTop:'20px'}} variant="danger">
-                                        {error}
-                                    </Alert>
-                                    }
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
+            <ToastContainer />
         </div>
     );
 }
@@ -210,4 +184,3 @@ const LoginPage=({loading,error,...props})=>{
 
 
 // export default connect(mapStateToProps,mapDispatchToProps)(LoginPage);
-export default LoginPage;

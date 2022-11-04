@@ -1,4 +1,5 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import * as BiIcons from "react-icons/bi";
 import * as RiIcons from "react-icons/ri";
 import * as IoIcons from "react-icons/io5";
@@ -7,20 +8,13 @@ import { Last } from "react-bootstrap/esm/PageItem";
 import { getValue } from "@testing-library/user-event/dist/utils";
 import { waitFor } from "@testing-library/react";
 
-
 const Contact=(props)=>{
 
-    /* Obtener  */
-    // const [id, setId] = useState(0);
-
-    // useEffect(() => {
-    //     setId(props.id);
-    // }, []);
     if (props.id == props.actual) {
         return (
             <div className="user" style={{backgroundColor: "gray"}}>
                 <div className="name">
-                    {console.log(props.slice[0][0])}
+                    {/* {console.log(props.slice[0][0])} */}
                     {props.name}
                 </div>
                 <div className="last-message">
@@ -68,17 +62,33 @@ const Textbox=(props)=>{
 }
 
 const ChatMsg=(props)=>{
+    const messagesEndRef = useRef(null);
+    const [mymessages, setMymessages] = useState(props.filteredData);
+    
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    }
+   
+    useEffect(() => {
+        scrollToBottom()
+    }, [mymessages, props.actual, props.update]);
+
+    useEffect(() => {
+        setMymessages(props.filteredData);
+    }, [mymessages, props.update]);
+
     return (
         <div className="chat-msg">
-            {props.filteredData[props.actual].messages.map((element, item) => {
+            {mymessages[props.actual].messages.map((element, item) => {
                 return(
                 <React.Fragment key={item}>
-                    <Textbox msg={element[0]} sender={element[2]} other={props.filteredData[props.actual].user}>
+                    <Textbox msg={element[0]} sender={element[2]} other={mymessages[props.actual].user}>
 
                     </Textbox>
                 </React.Fragment>
                 )
             })}
+            <div ref={messagesEndRef}></div>
         </div>
     );
 }
@@ -119,36 +129,17 @@ var p = [
 ];
 
 const ChatPage=()=>{
-    // const [chat, setChat] = useState();
+    const Navigate = useNavigate();
 
-    useEffect(() => {
-        setData(
-            p
-        );
+    const [data, setData] = useState(p);
 
-        setFilteredData(
-            p
-        );
-
-    }, []);
-
-    const [data, setData] = useState([{
-        user: "",
-        messages: [["", "", ""]]
-    }]);
-
-    const [filteredData, setFilteredData] = useState([{
-        user: "",
-        messages: [["", "", ""]]
-    }]);
+    const [filteredData, setFilteredData] = useState(p);
 
     const [update, setUpdate] = useState(0);
 
-    useEffect(() => {
-        setActual(0);
-    }, []);
-
     const [actual, setActual] = useState(0);
+
+    const [msg, setMsg] = useState("");
 
     const handleClick = (i) => {
         setActual(i);
@@ -172,17 +163,20 @@ const ChatPage=()=>{
         let msg = document.getElementById("msg-input").value;
 
         if (msg != "") {
-            setUpdate(1);
-            console.log(actual);
             let fecha = Date.now();
             let user = "user0";   // cuando haya login, se recupera esta info de la sesión
             const cdata = p;
             cdata[actual].messages.push([msg, fecha, user]);
             setData(cdata);
             setFilteredData(data);
-            // handleClick(actual);
-            setUpdate(0);
+            setUpdate(!update);
+            setMsg("");
         }
+    }
+
+    const LogOut = () => {
+        localStorage.removeItem("USER");
+        Navigate("/ogin");
     }
 
     return (
@@ -196,7 +190,7 @@ const ChatPage=()=>{
                 </div>
                 <div className="username">
                     <a>{localStorage.getItem("USER")}</a>
-                    <div><RiIcons.RiDoorOpenFill /></div>
+                    <div onClick={LogOut}><RiIcons.RiDoorOpenFill /></div>
                 </div>
             </div>
             {/* body */}
@@ -209,21 +203,18 @@ const ChatPage=()=>{
                         // console.log(data.indexOf(item));
                         return(
                             <React.Fragment key={item}>
-                            <div onClick={() => handleClick(item)}>
-                                <Contact name={element.user} msg={element.messages[element.messages.length-1][0]} id={item} actual={actual} slice={element.messages.slice(-1)}>
-                                
-                                </Contact>
-                            </div>
+                                <div onClick={() => handleClick(item)}>
+                                    <Contact name={element.user} msg={element.messages[element.messages.length-1][0]} id={item} actual={actual} slice={element.messages.slice(-1)} />                                
+                                </div>
                             </React.Fragment>
                         )
                     })}
                 </div>
                 <div className="chat">
-                    <ChatMsg filteredData={filteredData} actual={actual} update={update}>
+                    <ChatMsg filteredData={filteredData} actual={actual} update={update} />
 
-                    </ChatMsg>
                     <div className="text-bar">
-                        <input id="msg-input" type="text" placeholder="Escribe un mensaje" />
+                        <input id="msg-input" type="text" placeholder="Escribe un mensaje" value={msg} onChange={(e) => setMsg(e.target.value)} />
                         <div onClick={() => handleClickSubmit()}><IoIcons.IoSend/></div>
                     </div>
                 </div>

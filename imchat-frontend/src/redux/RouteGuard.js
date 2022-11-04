@@ -1,27 +1,14 @@
-import React from 'react';
-import { Route, Redirect } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
+import ChatPage from '../pages/chat/ChatPage';
+import LoginPage from '../pages/login/LoginPage';
  
-const RouteGuard = ({ component: Component, ...rest }) => {
- 
-   function hasJWT() {
-       let flag = false;
- 
-       //check user has JWT token
-       localStorage.getItem("USER_KEY") ? flag=true : flag=false
-      
-       return flag
-   }
- 
-   return (
-       <Route {...rest}
-           render={props => (
-               hasJWT() ?
-                   <Component {...props} />
-                   :
-                   <Redirect to={{ pathname: '/login' }} />
-           )}
-       />
-   );
+const RouteGuard = ({children}) => { 
+    if (!localStorage.getItem("USER")) {
+        return <Navigate to={"/login"}/>;
+    } else {
+        return children;
+    }
 };
 
 export default RouteGuard;
