@@ -100,7 +100,7 @@ export default function Register() {
             }
             if (data.status === 201) {
                 setTimeout(function(){
-                // navigate("/")
+                    navigate("/login");
                 }, 6000);
                 toast.success("User created! Redirectioning...", toastOptions);
                 localStorage.setItem(

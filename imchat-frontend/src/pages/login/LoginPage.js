@@ -53,9 +53,9 @@ export default function LoginPage(){
         });
         console.log(1);
         if (data.status === 200) {
+            console.log(data);
             setPhone(data.data.phone);
             console.log("Sesion creada!");
-            console.log(data);
             setFlag(0);
         } else {
             toast.error("Status Error! Try Again.")
@@ -116,7 +116,7 @@ export default function LoginPage(){
 
                                         <div className="form-group">
                                             <label>Username</label>
-                                            <input id="username" type="text" className="form-control" minLength={5} value={values.username} onChange={handleChange} name="username" required />
+                                            <input id="username" type="text" className="form-control" minLength={4} value={values.username} onChange={handleChange} name="username" required />
                                                 <div className="invalid-feedback">
                                                     UserId is invalid
                                                 </div>                                            

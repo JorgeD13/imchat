@@ -39,14 +39,16 @@ module.exports.login = async (request, response, next) => {
   .catch(function (error) {
     console.log(error)
   })
-  response.status(200).json(user); // borrar
-  // console.log(user);
-  // delete user['id'];
-  // delete user['public_key'];
-  // delete user['password'];
-  // console.log(user); 
-  //response.status(200).json(user);
-  /* if (user) {
+  console.log(user);
+
+//   return response.status(200).json(user); // borrar
+  console.log(user);
+  delete user['id'];
+  delete user['public_key'];
+  delete user['password'];
+  console.log(user); 
+//   response.status(200).json(user);
+  if (user) {
     try {
       await client.verify.services(TWILIO_VERIFY_SID)
       .verifications
@@ -60,22 +62,20 @@ module.exports.login = async (request, response, next) => {
         delete user['public_key'];
         delete user['password'];
         console.log(user);
-        response.status(200).json(user);
+        return response.status(200).json(user);
       })
     } catch (error) {
       console.log(error);
       return response.status(202).send("CANT SEND A MESSAGE!?!?!?!?!?!??!?!?!?!?!?");
     }
   } else {
-    response.status(202).send("NO USER FOUND");
-  } */
+    return response.status(202).send("NO USER FOUND");
+  }
 };
 
 module.exports.verify = async (request, response, next) => {
   console.log(request.body);
-  return response.status(200).send({
-    message: "User is Verified!!!!!!!!!"
-}); // borrar
+//   return response.status(200).send({ message: "User is Verified!!!!!!!!!" }); // borrar
   if (request.body.phone && (request.body.code).length === 6) {
     await client
     .verify
