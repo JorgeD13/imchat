@@ -86,7 +86,10 @@ export default function LoginPage(){
             console.log(data);
             localStorage.setItem("USER", values.username);
             console.log(localStorage);
-            navigate("/chat");
+            setTimeout(function(){
+                navigate("/chat");
+            }, 6000);
+            toast.success("User logged! Redirectioning...", toastOptions);
         } else {
             // toast.error("Status Error! Try Again.");
             console.log(1);
@@ -134,7 +137,7 @@ export default function LoginPage(){
                                             <button id="login-btn" type="submit" className="btn btn-primary">
                                                 Login
                                             </button>
-                                            <button id="register-btn" type="submit" className="btn btn-primary">
+                                            <button id="register-btn" className="btn btn-primary" onClick={() => {navigate("/register")}}>
                                                 Register
                                             </button>
                                         </div>

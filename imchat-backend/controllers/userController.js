@@ -12,7 +12,7 @@ var dataSource = new typeorm.DataSource({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     synchronize: true,
-    entities: [require("./../models/User")],
+    entities: [require("./../models/userModel")],
 })
 
 dataSource.initialize();

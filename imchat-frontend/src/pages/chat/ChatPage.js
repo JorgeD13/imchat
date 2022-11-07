@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import * as BiIcons from "react-icons/bi";
 import * as RiIcons from "react-icons/ri";
 import * as IoIcons from "react-icons/io5";
+import { io } from "socket.io-client";
 import './ChatPage.scss';
 import { Last } from "react-bootstrap/esm/PageItem";
 import { getValue } from "@testing-library/user-event/dist/utils";
@@ -68,7 +69,11 @@ const ChatMsg=(props)=>{
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }
-   
+
+    useEffect(() => {
+        
+    }, [mymessages])
+
     useEffect(() => {
         scrollToBottom()
     }, [mymessages, props.actual, props.update]);
