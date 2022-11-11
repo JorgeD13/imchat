@@ -92,7 +92,7 @@ export default function Register() {
                 phone,
                 password: ePassword.toString(CryptoJS.enc.Hex),
                 public_key
-            });     
+            });
             console.log(data);
             if (data.status !== 201) {
                 console.log(11);

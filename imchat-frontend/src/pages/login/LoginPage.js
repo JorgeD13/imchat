@@ -23,26 +23,18 @@ export default function LoginPage(){
     const [flag, setFlag] = useState(1);
     const [code, setCode] = useState(0);
     const [phone, setPhone] = useState(0);
+    const [userid, setUserid] = useState(-1);
 
     const [values, setValues] = useState({
         username: '',
         password: ''
     });
 
-    // useEffect = () =>{
-    //     setValues(
-    //         {
-    //             username: '',
-    //             password: ''
-    //         }
-    //     );
-    // }
-
     async function handleSubmit (evt) {
         evt.preventDefault();
         // props.authenticate();
 
-        console.log("LOCAL STORE: ", localStorage);
+        // console.log("LOCAL STORE: ", localStorage);
 
         const {username, password} = values;
         console.log(values);
@@ -55,6 +47,7 @@ export default function LoginPage(){
         if (data.status === 200) {
             console.log(data);
             setPhone(data.data.phone);
+            setUserid(data.data.id);
             console.log("Sesion creada!");
             setFlag(0);
         } else {
@@ -85,6 +78,7 @@ export default function LoginPage(){
             console.log("Codigo correcto!");
             console.log(data);
             localStorage.setItem("USER", values.username);
+            localStorage.setItem("USER_ID", userid);
             console.log(localStorage);
             setTimeout(function(){
                 navigate("/chat");

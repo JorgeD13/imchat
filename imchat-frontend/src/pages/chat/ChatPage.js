@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import * as BiIcons from "react-icons/bi";
 import * as RiIcons from "react-icons/ri";
@@ -8,6 +9,7 @@ import './ChatPage.scss';
 import { Last } from "react-bootstrap/esm/PageItem";
 import { getValue } from "@testing-library/user-event/dist/utils";
 import { waitFor } from "@testing-library/react";
+import { host, sendMessageRoute } from "../../utils/APIRoutes";
 
 const Contact=(props)=>{
 
@@ -64,18 +66,19 @@ const Textbox=(props)=>{
 
 const ChatMsg=(props)=>{
     const messagesEndRef = useRef(null);
+
     const [mymessages, setMymessages] = useState(props.filteredData);
     
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }
 
-    useEffect(() => {
-        
-    }, [mymessages])
+    // useEffect(() => {
+    //     sendMsg();
+    // }, [mymessages]);
 
     useEffect(() => {
-        scrollToBottom()
+        scrollToBottom();
     }, [mymessages, props.actual, props.update]);
 
     useEffect(() => {
@@ -133,18 +136,101 @@ var p = [
     }
 ];
 
+var m = {
+    userFrom: "usuario1",
+    userTo: "usuario2",
+    messages: [
+        {
+            msg,
+            ts
+        }
+    ]
+}
+
+var c = [
+    {
+        user: "usuario1",
+        lastMsg: "Hola"
+    },
+    {
+        user: "usuario2",
+        lastMsg: "Hola2"
+    },
+    {
+        user: "usuario3",
+        lastMsg: "Hola3"
+    },
+    {
+        user: "usuario4",
+        lastMsg: "Hola4"
+    },
+    {
+        user: "usuario5",
+        lastMsg: "Hola5"
+    },
+    {
+        user: "usuario6",
+        lastMsg: "Hola7"
+    },
+    {
+        user: "usuario8",
+        lastMsg: "Hola9"
+    }
+];
+
 const ChatPage=()=>{
-    const Navigate = useNavigate();
+    const navigate = useNavigate();
+
+    const socket = useRef();
+
+    const [contacts, setContacts] = useState(c);
+    const [filteredContacts, setFilteredContacts] = useState(c);
 
     const [data, setData] = useState(p);
-
-    const [filteredData, setFilteredData] = useState(p);
-
+    const [filteredData, setFilteredData] = useState(p); // cambiar por un diccionario
+    
     const [update, setUpdate] = useState(0);
-
     const [actual, setActual] = useState(0);
 
     const [msg, setMsg] = useState("");
+    const [currentUser, setCurrentUser] = useState(undefined);
+    const [currentUserId, setCurrentUserId] = useState(undefined);
+
+
+    const sendMsg = async () => {
+        // sendMessageRoute
+        const username = localStorage.getItem("USER");
+        const userid = localStorage.getItem("USER_ID");
+        // socket.current.emit("send-msg", {
+        //     to: 1,
+        //     from: userid,
+        //     msg,
+        // });
+    }
+
+    useEffect(() => {
+        async function foo() {
+            // localStorage.setItem("USER", "hola");
+            if (!localStorage.getItem("USER")) {
+                navigate("/login");
+            } else {
+                setCurrentUser(
+                    localStorage.getItem("USER")
+                );
+                setCurrentUserId(
+                    localStorage.getItem("USER_ID")
+                );
+            }
+        }
+        foo();
+    }, []);
+
+    useEffect(() => {
+        if (currentUser) {
+            // socket.current = io(host);
+            // socket.current.emit("add-user", currentUserId);
+        }
+    }, [currentUser]);
 
     const handleClick = (i) => {
         setActual(i);
@@ -154,6 +240,7 @@ const ChatPage=()=>{
         // filtar:
         if (e == " ") {
             setFilteredData(data);
+            setFilteredContacts(contacts);
         } else {
             const dataToAssign = data.filter(d => d.user.includes(e));
             if (dataToAssign.length != 0) {
@@ -161,7 +248,14 @@ const ChatPage=()=>{
                     dataToAssign
                 );
             }
+            const dataToAssign2 = contacts.filter(d => d.user.includes(e));
+            if (dataToAssign2.length != 0) {
+                setFilteredContacts(dataToAssign2);
+                console.log(filteredContacts);
+            }
+            
         }
+        // console.log(filteredContacts);
     }
 
     const handleClickSubmit = () => {
@@ -172,6 +266,12 @@ const ChatPage=()=>{
             let user = "user0";   // cuando haya login, se recupera esta info de la sesión
             const cdata = p;
             cdata[actual].messages.push([msg, fecha, user]);
+
+            let ccontacts = contacts;
+            ccontacts[actual].lastMsg = msg;
+            setContacts(ccontacts);
+            setFilteredContacts(ccontacts);
+
             setData(cdata);
             setFilteredData(data);
             setUpdate(!update);
@@ -181,7 +281,8 @@ const ChatPage=()=>{
 
     const LogOut = () => {
         localStorage.removeItem("USER");
-        Navigate("/ogin");
+        localStorage.removeItem("USER_ID");
+        navigate("/login");
     }
 
     return (
@@ -194,7 +295,7 @@ const ChatPage=()=>{
                     {/* <a>hola</a> */}
                 </div>
                 <div className="username">
-                    <a>{localStorage.getItem("USER")}</a>
+                    <a>{ localStorage.getItem("USER") }</a>
                     <div onClick={LogOut}><RiIcons.RiDoorOpenFill /></div>
                 </div>
             </div>
@@ -202,14 +303,15 @@ const ChatPage=()=>{
             <div className="body">
                 <div className="contacts">
                     {
-                    filteredData.map((element, item) => {
+                    filteredContacts.map((element, item) => {
                         // console.log(element);
                         // {console.log(item)}
                         // console.log(data.indexOf(item));
                         return(
                             <React.Fragment key={item}>
                                 <div onClick={() => handleClick(item)}>
-                                    <Contact name={element.user} msg={element.messages[element.messages.length-1][0]} id={item} actual={actual} slice={element.messages.slice(-1)} />                                
+                                    {/* <Contact name={element.user} msg={element.messages[element.messages.length-1][0]} id={item} actual={actual} slice={element.messages.slice(-1)} /> */}
+                                    <Contact name={element.user} msg={element.lastMsg} id={item} actual={actual} />
                                 </div>
                             </React.Fragment>
                         )

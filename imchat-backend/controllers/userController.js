@@ -18,7 +18,7 @@ var dataSource = new typeorm.DataSource({
 dataSource.initialize();
 var userRepository = dataSource.getRepository("User")
 
-module.exports.register = async (request, response, next) => {
+module.exports.register = async (request, response) => {
     await userRepository.save(request.body)
     .then(function (savedUser) {
         console.log("User has been saved: ", savedUser)
@@ -29,7 +29,7 @@ module.exports.register = async (request, response, next) => {
     response.status(201).send("User added!")
 };
 
-module.exports.login = async (request, response, next) => {
+module.exports.login = async (request, response) => {
   const user = await userRepository.findOne({
     where: {
       username: request.body.username,
@@ -46,7 +46,7 @@ module.exports.login = async (request, response, next) => {
   delete user['id'];
   delete user['public_key'];
   delete user['password'];
-  console.log(user); 
+  console.log(user);
 //   response.status(200).json(user);
   if (user) {
     try {
@@ -58,7 +58,7 @@ module.exports.login = async (request, response, next) => {
       })
       .then(data => {
         console.log(user.username);
-        delete user['id'];
+        // delete user['id']; // necesito el id para usarlo en el frontend
         delete user['public_key'];
         delete user['password'];
         console.log(user);
@@ -73,7 +73,7 @@ module.exports.login = async (request, response, next) => {
   }
 };
 
-module.exports.verify = async (request, response, next) => {
+module.exports.verify = async (request, response) => {
   console.log(request.body);
 //   return response.status(200).send({ message: "User is Verified!!!!!!!!!" }); // borrar
   if (request.body.phone && (request.body.code).length === 6) {
@@ -94,4 +94,8 @@ module.exports.verify = async (request, response, next) => {
     })
   }
   else return response.status(202).send("No se pudo verificar el codigo");
+}
+
+module.exports.getusers = async (response) => {
+  return response.status(200).send(userRepository.find());
 }

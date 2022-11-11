@@ -17,14 +17,14 @@ function App() {
         <Routes>
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
-            {/* <Route path="/chat" component={<ChatPage />} /> */}
-            <Route path="/chat"
+            <Route path="/chat" element={<ChatPage />} />
+            {/* <Route path="/chat"
                 element={
                     <RouteGuard>
                         <ChatPage />
                     </RouteGuard>
                 }
-            />
+            /> */}
             <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
         </BrowserRouter>
