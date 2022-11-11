@@ -10,19 +10,36 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/auth", userRoutes);
 
-
-
 var typeorm = require("typeorm");
-var dataSource = new typeorm.DataSource({
-    type: "postgres",
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    synchronize: true,
-    entities: [require("./models/messageModel")],
-})
+const { getRepository } = require("typeorm");
+
+//
+(async () => {
+    const dataSource = new typeorm.DataSource({
+        type: "postgres",
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
+        username: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+        synchronize: true,
+        entities: [require("./models/messageModel")],
+    })
+    const d = await dataSource.initialize();
+    const queryRunner = await d.createQueryRunner();
+
+    let user_id = 1//request.body.user_id;
+    const sql = `
+        select distinct on (user_util) *,
+        case when user_to = ${user_id} then user_from else user_to end as user_util
+        from imchat.message
+        where user_to = ${user_id}
+        or user_from = ${user_id}
+        order by user_util, timestamp desc
+    `
+    var result = await queryRunner.manager.query(sql);
+    console.log(result);
+})()
 
 /* dataSource
     .initialize()

@@ -1,4 +1,4 @@
-const { response } = require("express");
+/* const { response } = require("express");
 var typeorm = require("typeorm");
 const bcrypt = require("bcrypt");
 
@@ -22,7 +22,7 @@ module.exports.addmsg = async (request, response) => {
     console.log(msg);
     
 
-    /*
+    
     await msgRepository.save(request.body)
     .then(function (savedMsg) {
         console.log("Message has been saved: ", savedMsg)
@@ -31,7 +31,7 @@ module.exports.addmsg = async (request, response) => {
         console.log(error)
     })
     response.status(201).send("Message added!")
-    */
+    
 };
 
 module.exports.getmsg = async (request, response) => {
@@ -49,3 +49,16 @@ module.exports.getmsg = async (request, response) => {
         order: {timestamp: "ASC"}
     }));
 };
+
+module.exports.getlastmsg = async (request, response) => {
+    let user_id = request.body.user_id;
+    const sql = `
+        select distinct on (user_util) *,
+        case when user_to = ${user_id} then user_from else user_to end as user_util
+        from imchat.message
+        where user_to = ${user_id}
+        or user_from = ${user_id}
+        order by user_util, timestamp desc
+    `
+    let msgs = await manager.query(sql)
+}; */
