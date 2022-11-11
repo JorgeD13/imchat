@@ -21,12 +21,12 @@ var userRepository = dataSource.getRepository("User")
 module.exports.register = async (request, response) => {
     await userRepository.save(request.body)
     .then(function (savedUser) {
-        console.log("User has been saved: ", savedUser)
+        console.log("User has been saved: ", savedUser);
     })
     .catch(function (error) {
-        console.log(error)
+        console.log(error);
     })
-    response.status(201).send("User added!")
+    response.status(201).send("User added!");
 };
 
 module.exports.login = async (request, response) => {

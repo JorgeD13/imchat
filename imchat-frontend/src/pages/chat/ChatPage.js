@@ -11,8 +11,7 @@ import { getValue } from "@testing-library/user-event/dist/utils";
 import { waitFor } from "@testing-library/react";
 import { host, sendMessageRoute } from "../../utils/APIRoutes";
 
-const Contact=(props)=>{
-
+const Contact = (props) => {
     if (props.id == props.actual) {
         return (
             <div className="user" style={{backgroundColor: "gray"}}>
@@ -64,10 +63,15 @@ const Textbox=(props)=>{
     )
 }
 
-const ChatMsg=(props)=>{
+const ChatMsg = (props) => {
     const messagesEndRef = useRef(null);
 
     const [mymessages, setMymessages] = useState(props.filteredData);
+    const [mymessages2, setMymessages2] = useState({
+        userFrom: "",
+        userTo: "",
+        messages: []
+    });
     
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -85,6 +89,14 @@ const ChatMsg=(props)=>{
         setMymessages(props.filteredData);
     }, [mymessages, props.update]);
 
+    useEffect(() => {
+        scrollToBottom();
+    }, [mymessages2, props.actual, props.update]);
+
+    useEffect(() => {
+        setMymessages2(props.mensajes2);
+    }, [mymessages2, props.update]);
+
     return (
         <div className="chat-msg">
             {mymessages[props.actual].messages.map((element, item) => {
@@ -96,6 +108,15 @@ const ChatMsg=(props)=>{
                 </React.Fragment>
                 )
             })}
+            {mymessages2["messages"].map((element, item) => {
+                return(
+                <React.Fragment key={item}>
+                    <Textbox msg={element["content"]} sender={element["user_from"]} other={mymessages["userFrom"]}>
+
+                    </Textbox>
+                </React.Fragment>
+                )
+            })} 
             <div ref={messagesEndRef}></div>
         </div>
     );
@@ -141,8 +162,22 @@ var m = {
     userTo: "usuario2",
     messages: [
         {
-            msg,
-            ts
+            content: "hola",
+            user_to: 1,
+            user_from: 2,
+            timestamp: 0
+        },
+        {
+            content: "adios",
+            user_to: 2,
+            user_from: 1,
+            timestamp: 0
+        },
+        {
+            content: "hola de nuevo",
+            user_to: 1,
+            user_from: 2,
+            timestamp: 0
         }
     ]
 }
@@ -150,35 +185,42 @@ var m = {
 var c = [
     {
         user: "usuario1",
+        userID: 1,
         lastMsg: "Hola"
     },
     {
         user: "usuario2",
+        userID: 2,
         lastMsg: "Hola2"
     },
     {
         user: "usuario3",
+        userID: 3,
         lastMsg: "Hola3"
     },
     {
         user: "usuario4",
+        userID: 4,
         lastMsg: "Hola4"
     },
     {
         user: "usuario5",
+        userID: 5,
         lastMsg: "Hola5"
     },
     {
         user: "usuario6",
-        lastMsg: "Hola7"
+        userID: 6,
+        lastMsg: "Hola6"
     },
     {
-        user: "usuario8",
-        lastMsg: "Hola9"
+        user: "usuario7",
+        userID: 7,
+        lastMsg: "Hola7"
     }
 ];
 
-const ChatPage=()=>{
+const ChatPage = () =>{
     const navigate = useNavigate();
 
     const socket = useRef();
@@ -188,6 +230,7 @@ const ChatPage=()=>{
 
     const [data, setData] = useState(p);
     const [filteredData, setFilteredData] = useState(p); // cambiar por un diccionario
+    const [mensajes, setMensajes] = useState(m);
     
     const [update, setUpdate] = useState(0);
     const [actual, setActual] = useState(0);
@@ -195,7 +238,6 @@ const ChatPage=()=>{
     const [msg, setMsg] = useState("");
     const [currentUser, setCurrentUser] = useState(undefined);
     const [currentUserId, setCurrentUserId] = useState(undefined);
-
 
     const sendMsg = async () => {
         // sendMessageRoute
@@ -318,7 +360,7 @@ const ChatPage=()=>{
                     })}
                 </div>
                 <div className="chat">
-                    <ChatMsg filteredData={filteredData} actual={actual} update={update} />
+                    <ChatMsg filteredData={filteredData} actual={actual} update={update} mensajes2={mensajes} />
 
                     <div className="text-bar">
                         <input id="msg-input" type="text" placeholder="Escribe un mensaje" value={msg} onChange={(e) => setMsg(e.target.value)} />
