@@ -2,6 +2,7 @@ const { response } = require("express");
 const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_VERIFY_SID } = process.env;
 const client = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 var typeorm = require("typeorm");
+const { Not } = require("typeorm");
 const bcrypt = require("bcrypt");
 
 var dataSource = new typeorm.DataSource({
@@ -43,11 +44,11 @@ module.exports.login = async (request, response) => {
 
 //   return response.status(200).json(user); // borrar
   console.log(user);
-  delete user['id'];
+//   delete user['id'];
   delete user['public_key'];
   delete user['password'];
-  console.log(user);
-//   response.status(200).json(user);
+//   console.log(user);
+  return response.status(200).json(user);
   if (user) {
     try {
       await client.verify.services(TWILIO_VERIFY_SID)
@@ -75,7 +76,7 @@ module.exports.login = async (request, response) => {
 
 module.exports.verify = async (request, response) => {
   console.log(request.body);
-//   return response.status(200).send({ message: "User is Verified!!!!!!!!!" }); // borrar
+  return response.status(200).send({ message: "User is Verified!!!!!!!!!" }); // borrar
   if (request.body.phone && (request.body.code).length === 6) {
     await client
     .verify
@@ -93,9 +94,21 @@ module.exports.verify = async (request, response) => {
         }
     })
   }
+
   else return response.status(202).send("No se pudo verificar el codigo");
 }
 
-module.exports.getusers = async (response) => {
-  return response.status(200).send(userRepository.find());
+module.exports.getusers = async (request, response) => {
+  //var curr_user = request.body.userId
+//   console.log(request);
+//   console.log(request.body);
+    const r = await userRepository.find({
+        select: {
+          password: false,
+          phone: false
+        },
+        where: { id: Not(request.body.userId) }
+    });
+    console.log(r);
+    return response.status(200).send(r);
 }

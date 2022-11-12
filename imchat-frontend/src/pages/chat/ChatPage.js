@@ -9,7 +9,7 @@ import './ChatPage.scss';
 import { Last } from "react-bootstrap/esm/PageItem";
 import { getValue } from "@testing-library/user-event/dist/utils";
 import { waitFor } from "@testing-library/react";
-import { host, sendMessageRoute } from "../../utils/APIRoutes";
+import { host, sendMessageRoute, allUsersRoute, recieveMessageRoute } from "../../utils/APIRoutes";
 
 const Contact = (props) => {
     if (props.id == props.actual) {
@@ -38,14 +38,16 @@ const Contact = (props) => {
     )
 }
 
-const Textbox=(props)=>{
-    const me = props.other != props.sender;
-    
+const Textbox = (props) => {
+    const me = props.other == props.sender;
+
     if (me) {
         return (
             <div className="container" style={{justifyContent: "flex-end"}} >
                 <div className="wrapper-2">
                     <div className="msg">
+                        {/* {props.other} */}
+                        {/* {props.sender} */}
                         {props.msg}
                     </div>
                 </div>
@@ -56,6 +58,7 @@ const Textbox=(props)=>{
         <div className="container">
             <div className="wrapper">
                 <div className="msg">
+                    {/* {props.other} */}
                     {props.msg}
                 </div>
             </div>
@@ -66,54 +69,27 @@ const Textbox=(props)=>{
 const ChatMsg = (props) => {
     const messagesEndRef = useRef(null);
 
-    const [mymessages, setMymessages] = useState(props.filteredData);
-    const [mymessages2, setMymessages2] = useState({
+    const [mymessages, setMymessages] = useState({
         userFrom: "",
         userTo: "",
         messages: []
     });
-    
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-    }
-
-    // useEffect(() => {
-    //     sendMsg();
-    // }, [mymessages]);
 
     useEffect(() => {
+        const scrollToBottom = () => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }) }
         scrollToBottom();
     }, [mymessages, props.actual, props.update]);
 
     useEffect(() => {
-        setMymessages(props.filteredData);
+        setMymessages(props.messages);
     }, [mymessages, props.update]);
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [mymessages2, props.actual, props.update]);
-
-    useEffect(() => {
-        setMymessages2(props.mensajes2);
-    }, [mymessages2, props.update]);
 
     return (
         <div className="chat-msg">
-            {mymessages[props.actual].messages.map((element, item) => {
+            {mymessages["messages"].map((element, item) => {
                 return(
                 <React.Fragment key={item}>
-                    <Textbox msg={element[0]} sender={element[2]} other={mymessages[props.actual].user}>
-
-                    </Textbox>
-                </React.Fragment>
-                )
-            })}
-            {mymessages2["messages"].map((element, item) => {
-                return(
-                <React.Fragment key={item}>
-                    <Textbox msg={element["content"]} sender={element["user_from"]} other={mymessages["userFrom"]}>
-
-                    </Textbox>
+                    <Textbox msg={element["content"]} sender={props.userID} other={element["user_from"]} />
                 </React.Fragment>
                 )
             })} 
@@ -163,20 +139,20 @@ var m = {
     messages: [
         {
             content: "hola",
-            user_to: 1,
-            user_from: 2,
+            user_to: 92,
+            user_from: 93,
             timestamp: 0
         },
         {
             content: "adios",
-            user_to: 2,
-            user_from: 1,
+            user_to: 93,
+            user_from: 92,
             timestamp: 0
         },
         {
             content: "hola de nuevo",
-            user_to: 1,
-            user_from: 2,
+            user_to: 92,
+            user_from: 93,
             timestamp: 0
         }
     ]
@@ -186,41 +162,48 @@ var c = [
     {
         user: "usuario1",
         userID: 1,
-        lastMsg: "Hola"
+        lastMsg: "Hola",
+        public_key: "912613bbc9cbb73ef0fcf4c72619a8400c845fbde1b809ceba9b3c3902bb2e3a"
     },
     {
         user: "usuario2",
         userID: 2,
-        lastMsg: "Hola2"
+        lastMsg: "Hola2",
+        public_key: "912613bbc9cbb73ef0fcf4c72619a8400c845fbde1b809ceba9b3c3902bb2e3a"
     },
     {
         user: "usuario3",
         userID: 3,
-        lastMsg: "Hola3"
+        lastMsg: "Hola3",
+        public_key: "912613bbc9cbb73ef0fcf4c72619a8400c845fbde1b809ceba9b3c3902bb2e3a"
     },
     {
         user: "usuario4",
         userID: 4,
-        lastMsg: "Hola4"
+        lastMsg: "Hola4",
+        public_key: "912613bbc9cbb73ef0fcf4c72619a8400c845fbde1b809ceba9b3c3902bb2e3a"
     },
     {
         user: "usuario5",
         userID: 5,
-        lastMsg: "Hola5"
+        lastMsg: "Hola5",
+        public_key: "912613bbc9cbb73ef0fcf4c72619a8400c845fbde1b809ceba9b3c3902bb2e3a"
     },
     {
         user: "usuario6",
         userID: 6,
-        lastMsg: "Hola6"
+        lastMsg: "Hola6",
+        public_key: "912613bbc9cbb73ef0fcf4c72619a8400c845fbde1b809ceba9b3c3902bb2e3a"
     },
     {
         user: "usuario7",
         userID: 7,
-        lastMsg: "Hola7"
+        lastMsg: "Hola7",
+        public_key: "912613bbc9cbb73ef0fcf4c72619a8400c845fbde1b809ceba9b3c3902bb2e3a"
     }
 ];
 
-const ChatPage = () =>{
+const ChatPage = () => {
     const navigate = useNavigate();
 
     const socket = useRef();
@@ -228,31 +211,19 @@ const ChatPage = () =>{
     const [contacts, setContacts] = useState(c);
     const [filteredContacts, setFilteredContacts] = useState(c);
 
-    const [data, setData] = useState(p);
-    const [filteredData, setFilteredData] = useState(p); // cambiar por un diccionario
-    const [mensajes, setMensajes] = useState(m);
+    const [messages, setMessages] = useState(m);
     
     const [update, setUpdate] = useState(0);
     const [actual, setActual] = useState(0);
 
     const [msg, setMsg] = useState("");
+    const [arrivalMessage, setArrivalMessage] = useState(null);
+
     const [currentUser, setCurrentUser] = useState(undefined);
     const [currentUserId, setCurrentUserId] = useState(undefined);
 
-    const sendMsg = async () => {
-        // sendMessageRoute
-        const username = localStorage.getItem("USER");
-        const userid = localStorage.getItem("USER_ID");
-        // socket.current.emit("send-msg", {
-        //     to: 1,
-        //     from: userid,
-        //     msg,
-        // });
-    }
-
     useEffect(() => {
         async function foo() {
-            // localStorage.setItem("USER", "hola");
             if (!localStorage.getItem("USER")) {
                 navigate("/login");
             } else {
@@ -262,6 +233,13 @@ const ChatPage = () =>{
                 setCurrentUserId(
                     localStorage.getItem("USER_ID")
                 );
+
+                /* CONTACTOS */
+                let data = await axios.post(allUsersRoute, {
+                    userId: localStorage.getItem("USER_ID")
+                });
+
+                console.log(data);
             }
         }
         foo();
@@ -269,57 +247,113 @@ const ChatPage = () =>{
 
     useEffect(() => {
         if (currentUser) {
-            // socket.current = io(host);
-            // socket.current.emit("add-user", currentUserId);
+            socket.current = io(host);
+            socket.current.emit("add-user", currentUserId);
         }
     }, [currentUser]);
 
     const handleClick = (i) => {
         setActual(i);
+        // aqui se deben cambiar los mensajes
+        
     }
 
     const handleSearch = (e) => {
         // filtar:
         if (e == " ") {
-            setFilteredData(data);
             setFilteredContacts(contacts);
         } else {
-            const dataToAssign = data.filter(d => d.user.includes(e));
+            const dataToAssign = contacts.filter(d => d.user.includes(e));
             if (dataToAssign.length != 0) {
-                setFilteredData(
-                    dataToAssign
-                );
-            }
-            const dataToAssign2 = contacts.filter(d => d.user.includes(e));
-            if (dataToAssign2.length != 0) {
-                setFilteredContacts(dataToAssign2);
+                setFilteredContacts(dataToAssign);
                 console.log(filteredContacts);
-            }
-            
+            } 
         }
-        // console.log(filteredContacts);
     }
 
-    const handleClickSubmit = () => {
-        let msg = document.getElementById("msg-input").value;
+    const handleClickSubmit = async () => {
+        // let msg = await document.getElementById("msg-input").value;
 
         if (msg != "") {
-            let fecha = Date.now();
+            let fecha = (new Date()).toISOString();
             let user = "user0";   // cuando haya login, se recupera esta info de la sesión
-            const cdata = p;
-            cdata[actual].messages.push([msg, fecha, user]);
 
+            let id_from = currentUserId;
+        
+
+            /* AXIOS */
+            let data = await axios.post(sendMessageRoute, {
+                user_from: id_from,
+                user_to: "93",
+                content: msg,
+                timestamp: fecha
+            });
+
+            /* SOCKET */
+            socket.current.emit("send-msg", {
+                from: id_from,
+                to: "93",
+                msg: msg,
+                timestamp: fecha
+            });
+
+            if (data.status == 200) {
+                console.log("SUCCES");
+            } else {
+                console.log("FAILED");
+            }
+
+            /* HOOKS */
+            let cmessages = messages;
+            cmessages.messages.push({
+                content: msg,
+                user_to: actual,
+                user_from: localStorage.getItem("USER_ID"),
+                timestamp: 0
+            });
+            setMessages(cmessages);
+
+            /* ACTUALIZAR EL ÚLTIMO MENSAJE EN LOS CONTACTOS */ 
             let ccontacts = contacts;
             ccontacts[actual].lastMsg = msg;
             setContacts(ccontacts);
             setFilteredContacts(ccontacts);
 
-            setData(cdata);
-            setFilteredData(data);
+            /* ACTUALIZAR EL RENDER Y LIMPIAR EL INPUT */
             setUpdate(!update);
             setMsg("");
         }
     }
+
+    useEffect(() => {
+        function listen() {
+            if (socket.current) {
+                console.log("ARRIVAL MSG");
+                socket.current.on("msg-recieve", (msg) => {
+                    // setArrivalMessage({ fromSelf: false, message: msg });
+                    setArrivalMessage({
+                        content: msg.msg,
+                        user_to: msg.to,
+                        user_from: msg.from,
+                        timestamp: msg.timestamp
+                    });
+                });
+            }
+        }
+        listen();
+      }, [currentUser]);
+
+    useEffect(() => {
+        if (arrivalMessage) {
+            console.log(arrivalMessage);
+            let cMessages = messages;
+            cMessages.messages.push(arrivalMessage);
+            setMessages(cMessages);
+            setUpdate(!update);
+            setArrivalMessage(undefined);
+        }
+        // arrivalMessage && setMensajes((prev) => [...prev, arrivalMessage]);
+      }, [arrivalMessage]);
 
     const LogOut = () => {
         localStorage.removeItem("USER");
@@ -337,7 +371,7 @@ const ChatPage = () =>{
                     {/* <a>hola</a> */}
                 </div>
                 <div className="username">
-                    <a>{ localStorage.getItem("USER") }</a>
+                    <a>{ currentUser }</a>
                     <div onClick={LogOut}><RiIcons.RiDoorOpenFill /></div>
                 </div>
             </div>
@@ -360,7 +394,7 @@ const ChatPage = () =>{
                     })}
                 </div>
                 <div className="chat">
-                    <ChatMsg filteredData={filteredData} actual={actual} update={update} mensajes2={mensajes} />
+                    <ChatMsg actual={actual} update={update} messages={messages} userID={currentUserId} />
 
                     <div className="text-bar">
                         <input id="msg-input" type="text" placeholder="Escribe un mensaje" value={msg} onChange={(e) => setMsg(e.target.value)} />

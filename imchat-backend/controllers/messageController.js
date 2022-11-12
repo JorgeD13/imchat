@@ -1,4 +1,4 @@
-/* const { response } = require("express");
+const { response } = require("express");
 var typeorm = require("typeorm");
 const bcrypt = require("bcrypt");
 
@@ -18,19 +18,18 @@ var msgRepository = dataSource.getRepository("Message")
 
 module.exports.addmsg = async (request, response) => {
     // request.body es lo que le paso desde el frontend
-    let msg = request.body;
-    console.log(msg);
-    
-
+    // let msg = request.body;
+    // console.log(msg);
     
     await msgRepository.save(request.body)
     .then(function (savedMsg) {
-        console.log("Message has been saved: ", savedMsg)
+        console.log("Message has been saved: ", savedMsg);
+        response.status(200).send("Message added!");
     })
     .catch(function (error) {
-        console.log(error)
-    })
-    response.status(201).send("Message added!")
+        console.log(error);
+        response.status(202).send("Erros has ocurred!");
+    });
     
 };
 
@@ -61,4 +60,4 @@ module.exports.getlastmsg = async (request, response) => {
         order by user_util, timestamp desc
     `
     let msgs = await manager.query(sql)
-}; */
+};

@@ -17,7 +17,7 @@ export default function LoginPage(){
         autoClose: 5000,
         pauseOnHover: true,
         draggable: true,
-        theme: "dark",
+        theme: "light",
     };
 
     const [flag, setFlag] = useState(1);
@@ -43,7 +43,7 @@ export default function LoginPage(){
             username,
             password: ePassword.toString(CryptoJS.enc.Hex)
         });
-        console.log(1);
+        console.log(data);
         if (data.status === 200) {
             console.log(data);
             setPhone(data.data.phone);

@@ -2,18 +2,22 @@ require("dotenv").config()
 
 const express = require("express");
 const cors = require("cors");
-const userRoutes = require("./routes/userRoutes")
+const userRoutes = require("./routes/userRoutes");
+const messageRoutes = require("./routes/messageRoutes");
 
 const app = express();
                     
 app.use(cors());
 app.use(express.json());
 app.use("/api/auth", userRoutes);
+app.use("/api/messages", messageRoutes);
 
 var typeorm = require("typeorm");
 const { getRepository } = require("typeorm");
+const socket = require("socket.io");
 
 //
+
 (async () => {
     const dataSource = new typeorm.DataSource({
         type: "postgres",
@@ -38,7 +42,9 @@ const { getRepository } = require("typeorm");
         order by user_util, timestamp desc
     `
     var result = await queryRunner.manager.query(sql);
-    console.log(result);
+
+    var msgRepository = await d.getRepository("Message")
+    //console.log(await msgRepository.find()); 
 })()
 
 /* dataSource
@@ -74,3 +80,35 @@ const { getRepository } = require("typeorm");
 const server = app.listen(process.env.PORT, ()=>{
     console.log(`Server started on port ${process.env.PORT}`);
 });
+
+const io = socket(server, {
+    cors: {
+        origin: "http://localhost:3000",
+        credentials: true
+    }
+});
+
+global.onlineUsers = new Map();
+
+io.on("connection", (socket)=>{
+    global.chatSocket = socket;
+
+    socket.on("add-user", (userId) => {
+        onlineUsers.set(userId, socket.id);
+        // console.log("ADD USER");
+        // console.log(userId);
+        // console.log(onlineUsers.get(userId));
+    })
+
+    socket.on("send-msg", (data) => {
+        // console.log("aqui");
+        // console.log(data);
+        const sendUserSocket = onlineUsers.get(data.to);
+        if (sendUserSocket) {
+            socket.to(sendUserSocket).emit("msg-recieve", data);
+            console.log("ENVIADO");
+        } else {
+            console.log("EL USUARIO NO EXISTE");
+        }
+    })
+})
