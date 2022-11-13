@@ -15,6 +15,7 @@ var dataSource = new typeorm.DataSource({
 
 dataSource.initialize();
 var msgRepository = dataSource.getRepository("Message")
+var queryRunner = dataSource.createQueryRunner();
 
 module.exports.addmsg = async (request, response) => {
     // request.body es lo que le paso desde el frontend
@@ -33,20 +34,20 @@ module.exports.addmsg = async (request, response) => {
     
 };
 
-module.exports.getmsg = async (request, response) => {
-    return response.status(200).send(msgRepository.find({
-        where: [
-            {
-                user_to: request.body.user1,
-                user_from: request.body.user2
-            },
-            {
-                user_to: request.body.user2,
-                user_from: request.body.user1
-            },
-        ],
-        order: {timestamp: "ASC"}
-    }));
+module.exports.getmsgs = async (request, response) => {
+    // var user1 = await request.body.user1;
+    // var user2 = await request.body.user2;
+    console.log(request.body);
+
+    const sql = `
+        select *
+        from imchat.message 
+        where (user_to = ${request.body.user1} and user_from = ${request.body.user2})
+        or (user_to = ${request.body.user2} and user_from = ${request.body.user1})
+    `;
+    var result = await queryRunner.manager.query(sql);
+    // console.log(result);
+    return response.status(200).send(result);
 };
 
 module.exports.getlastmsg = async (request, response) => {
@@ -58,6 +59,6 @@ module.exports.getlastmsg = async (request, response) => {
         where user_to = ${user_id}
         or user_from = ${user_id}
         order by user_util, timestamp desc
-    `
+    `;
     let msgs = await manager.query(sql)
 };

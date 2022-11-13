@@ -18,8 +18,8 @@ const socket = require("socket.io");
 
 //
 
-(async () => {
-    const dataSource = new typeorm.DataSource({
+/* (async () => {
+    var dataSource = new typeorm.DataSource({
         type: "postgres",
         host: process.env.DB_HOST,
         port: process.env.DB_PORT,
@@ -27,25 +27,30 @@ const socket = require("socket.io");
         password: process.env.DB_PASSWORD,
         database: process.env.DB_NAME,
         synchronize: true,
-        entities: [require("./models/messageModel")],
+        entities: [require("./models/userModel")],
     })
     const d = await dataSource.initialize();
     const queryRunner = await d.createQueryRunner();
 
     let user_id = 1//request.body.user_id;
     const sql = `
-        select distinct on (user_util) *,
-        case when user_to = ${user_id} then user_from else user_to end as user_util
-        from imchat.message
-        where user_to = ${user_id}
-        or user_from = ${user_id}
-        order by user_util, timestamp desc
+        select username, public_key, user_from, content
+        from imchat.user u
+        left join (
+            select distinct on (user_util) *, case when user_to = ${user_id} then user_from else user_to end as user_util
+            from imchat.message
+            where user_to = ${user_id}
+            or user_from = ${user_id}
+            order by user_util, timestamp desc
+        ) m
+        on u.id = m.user_util
+        where u.id != 1
     `
     var result = await queryRunner.manager.query(sql);
 
-    var msgRepository = await d.getRepository("Message")
-    //console.log(await msgRepository.find()); 
-})()
+    // var msgRepository = await d.getRepository("Message")
+    console.log(result); 
+})() */
 
 /* dataSource
     .initialize()
@@ -94,15 +99,16 @@ io.on("connection", (socket)=>{
     global.chatSocket = socket;
 
     socket.on("add-user", (userId) => {
-        onlineUsers.set(userId, socket.id);
-        // console.log("ADD USER");
         // console.log(userId);
+        onlineUsers.set(userId, socket.id);
+        console.log("ADD USER");
+        console.log(userId);
         // console.log(onlineUsers.get(userId));
     })
 
     socket.on("send-msg", (data) => {
         // console.log("aqui");
-        // console.log(data);
+        console.log(data);
         const sendUserSocket = onlineUsers.get(data.to);
         if (sendUserSocket) {
             socket.to(sendUserSocket).emit("msg-recieve", data);

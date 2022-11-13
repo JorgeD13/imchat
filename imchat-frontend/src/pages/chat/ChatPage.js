@@ -9,30 +9,45 @@ import './ChatPage.scss';
 import { Last } from "react-bootstrap/esm/PageItem";
 import { getValue } from "@testing-library/user-event/dist/utils";
 import { waitFor } from "@testing-library/react";
-import { host, sendMessageRoute, allUsersRoute, recieveMessageRoute } from "../../utils/APIRoutes";
+import { host, sendMessageRoute, allUsersRoute, recieveMessageRoute } from "./../../utils/APIRoutes";
 
 const Contact = (props) => {
+    const [seen, setSeen] = useState(props.element.seen);
+
+    useEffect(() => {
+        setSeen(props.element.seen);
+        console.log("STA CAMIBANDO");
+    }, [props.element.seen, props.change])
+
     if (props.id == props.actual) {
+        if (!seen) {
+            setSeen(true);
+        }
         return (
             <div className="user" style={{backgroundColor: "gray"}}>
                 <div className="name">
-                    {/* {console.log(props.slice[0][0])} */}
-                    {props.name}
+                    {props.element.username}
                 </div>
                 <div className="last-message">
-                    {props.msg}
+                    {props.element.content}
                 </div>
             </div>
         )
     }
 
     return (
-        <div className="user">
+        <div className="user" onClick={() => {setSeen(true)}}>
             <div className="name">
-                {props.name}
+                {props.element.username}
             </div>
             <div className="last-message">
-                {props.msg}
+                {
+                    props.element.user_from & !seen
+                    ?
+                    <div className="badge text-bg-success">{props.element.content}</div>
+                    :
+                    <div className="msg-no-visto">{props.element.content}</div>
+                }
             </div>
         </div>
     )
@@ -70,18 +85,25 @@ const ChatMsg = (props) => {
     const messagesEndRef = useRef(null);
 
     const [mymessages, setMymessages] = useState({
-        userFrom: "",
-        userTo: "",
+        user_from: "",
+        user_to: "",
         messages: []
     });
 
     useEffect(() => {
-        const scrollToBottom = () => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }) }
-        scrollToBottom();
-    }, [mymessages, props.actual, props.update]);
+        const scrollToBottomFast = () => { messagesEndRef.current?.scrollIntoView({}) }
+        scrollToBottomFast();
+    }, [mymessages, props.actual]);
 
     useEffect(() => {
+        const scrollToBottom = () => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }) }
+        scrollToBottom();
+    }, [props.update])
+
+    useEffect(() => {
+        // console.log(mymessages["messages"]);
         setMymessages(props.messages);
+        // console.log(mymessages["messages"]);
     }, [mymessages, props.update]);
 
     return (
@@ -98,123 +120,33 @@ const ChatMsg = (props) => {
     );
 }
 
-var p = [
-    {
-        user: "usuario1",
-        messages: [["holaaa", "1666710185550", "usuario1"], ["como estas", "1666710185550", "usuario1"], ["jelou", "1666710185550", "usuario0"], ["jelou", "1666710185550", "usuario1"], ["jelou", "1666710185550", "usuario1"], ["jelou", "1666710185550", "usuario0"], ["jelou", "1666710185550", "usuario1"], ["jelou", "1666710185550", "usuario1"], ["jelou", "1666710185550", "usuario1"]]
-    },
-    {
-        user: "usuario2",
-        messages: [["buenas", "1666710185550", "usuario2"], ["tas bien?", "1666710185550", "usuario2"]]
-    },
-    {
-        user: "usuario3",
-        messages: [["hola", "1666710185550", "usuario3"], ["como estas", "1666710185550", "usuario0"]]
-    },
-    {
-        user: "usuario4",
-        messages: [["buenas", "1666710185550", "usuario0"], ["tas bien?", "1666710185550", "usuario0"]]
-    },
-    {
-        user: "usuario5",
-        messages: [["buenas", "1666710185550", "usuario5"], ["tas bien?", "1666710185550", "usuario5"]]
-    },
-    {
-        user: "usuario6",
-        messages: [["buenas", "1666710185550", "usuario0"], ["tas bien?", "1666710185550", "usuario0"]]
-    },
-    {
-        user: "usuario7",
-        messages: [["buenas", "1666710185550", "usuario0"], ["tas bien?", "1666710185550", "usuario0"]]
-    },
-    {
-        user: "usuario8",
-        messages: [["buenas", "1666710185550", "usuario8"], ["tas bien?", "1666710185550", "usuario8"]]
-    }
-];
-
-var m = {
-    userFrom: "usuario1",
-    userTo: "usuario2",
-    messages: [
-        {
-            content: "hola",
-            user_to: 92,
-            user_from: 93,
-            timestamp: 0
-        },
-        {
-            content: "adios",
-            user_to: 93,
-            user_from: 92,
-            timestamp: 0
-        },
-        {
-            content: "hola de nuevo",
-            user_to: 92,
-            user_from: 93,
-            timestamp: 0
-        }
-    ]
-}
-
-var c = [
-    {
-        user: "usuario1",
-        userID: 1,
-        lastMsg: "Hola",
-        public_key: "912613bbc9cbb73ef0fcf4c72619a8400c845fbde1b809ceba9b3c3902bb2e3a"
-    },
-    {
-        user: "usuario2",
-        userID: 2,
-        lastMsg: "Hola2",
-        public_key: "912613bbc9cbb73ef0fcf4c72619a8400c845fbde1b809ceba9b3c3902bb2e3a"
-    },
-    {
-        user: "usuario3",
-        userID: 3,
-        lastMsg: "Hola3",
-        public_key: "912613bbc9cbb73ef0fcf4c72619a8400c845fbde1b809ceba9b3c3902bb2e3a"
-    },
-    {
-        user: "usuario4",
-        userID: 4,
-        lastMsg: "Hola4",
-        public_key: "912613bbc9cbb73ef0fcf4c72619a8400c845fbde1b809ceba9b3c3902bb2e3a"
-    },
-    {
-        user: "usuario5",
-        userID: 5,
-        lastMsg: "Hola5",
-        public_key: "912613bbc9cbb73ef0fcf4c72619a8400c845fbde1b809ceba9b3c3902bb2e3a"
-    },
-    {
-        user: "usuario6",
-        userID: 6,
-        lastMsg: "Hola6",
-        public_key: "912613bbc9cbb73ef0fcf4c72619a8400c845fbde1b809ceba9b3c3902bb2e3a"
-    },
-    {
-        user: "usuario7",
-        userID: 7,
-        lastMsg: "Hola7",
-        public_key: "912613bbc9cbb73ef0fcf4c72619a8400c845fbde1b809ceba9b3c3902bb2e3a"
-    }
-];
-
 const ChatPage = () => {
     const navigate = useNavigate();
 
     const socket = useRef();
 
-    const [contacts, setContacts] = useState(c);
-    const [filteredContacts, setFilteredContacts] = useState(c);
+    const [contacts, setContacts] = useState([
+        {
+            username: "",
+            id: -1,
+            content: "",
+            user_from: -1,
+            public_key: "",
+            visto: false
+        }
+    ]);
+    const [filteredContacts, setFilteredContacts] = useState([]);
 
-    const [messages, setMessages] = useState(m);
+    const [messages, setMessages] = useState({
+        user_from: "",
+        user_to: "",
+        messages: []
+    });
     
     const [update, setUpdate] = useState(0);
-    const [actual, setActual] = useState(0);
+    const [change, setChange] = useState(0);
+    const [actual, setActual] = useState(-1);
+    const [actualID, setActualID] = useState(-1);
 
     const [msg, setMsg] = useState("");
     const [arrivalMessage, setArrivalMessage] = useState(null);
@@ -223,7 +155,7 @@ const ChatPage = () => {
     const [currentUserId, setCurrentUserId] = useState(undefined);
 
     useEffect(() => {
-        async function foo() {
+        async function session() {
             if (!localStorage.getItem("USER")) {
                 navigate("/login");
             } else {
@@ -233,27 +165,78 @@ const ChatPage = () => {
                 setCurrentUserId(
                     localStorage.getItem("USER_ID")
                 );
-
-                /* CONTACTOS */
-                let data = await axios.post(allUsersRoute, {
-                    userId: localStorage.getItem("USER_ID")
-                });
-
-                console.log(data);
             }
         }
-        foo();
+        session();
     }, []);
 
     useEffect(() => {
+        async function loadContacts() {
+            /* CONTACTOS */
+            let data = await axios.post(allUsersRoute, {
+                userId: localStorage.getItem("USER_ID")
+            }).then(function(response) {
+                console.log(response);
+                setContacts(response.data);
+                setFilteredContacts(response.data);
+                // setActualID(-1);
+                if (actualID == -1) {
+                    setActualID(contacts[0].id);
+                    setUpdate(!update);
+                }
+            });
+        }
+        if (currentUser) {
+            loadContacts();
+        }
+    }, [currentUser])
+
+    useEffect(() => {
+        console.log(currentUser);
         if (currentUser) {
             socket.current = io(host);
-            socket.current.emit("add-user", currentUserId);
+            socket.current.emit("add-user",  currentUserId);
         }
     }, [currentUser]);
 
-    const handleClick = (i) => {
+    useEffect(() => {
+        if (currentUserId && actualID) {
+            let data = axios.post(recieveMessageRoute, {
+                user1: currentUserId.toString(),
+                user2: actualID.toString()
+            }).then(function(res) {
+                if (res.status == 200 && actual!=-1) {
+                    console.log(contacts);
+                    console.log(actual);
+                    if (res.length != 0) {
+                        const dataToAssign = {
+                            userFrom: currentUser,
+                            userTo: contacts[actual].username,
+                            messages: res.data
+                        }
+                        setMessages(dataToAssign);
+                        setUpdate(!update);
+    
+                        let ccontacts = contacts;
+                        // console.log(res);
+                        // [res.data.length-1]
+                        ccontacts[actual].content = res.data[res.data.length-1].content;
+                        ccontacts[actual].visto = true;
+                        setContacts(ccontacts);
+                        setFilteredContacts(ccontacts);
+                    }
+                } else {
+                    console.log("ERROR!");
+                }
+            });
+        }
+    }, [actual])
+
+    const handleClick = async (i) => {
         setActual(i);
+        setActualID(contacts[i].id);
+        setUpdate(!update);
+
         // aqui se deben cambiar los mensajes
         
     }
@@ -266,7 +249,7 @@ const ChatPage = () => {
             const dataToAssign = contacts.filter(d => d.user.includes(e));
             if (dataToAssign.length != 0) {
                 setFilteredContacts(dataToAssign);
-                console.log(filteredContacts);
+                setUpdate(!update);
             } 
         }
     }
@@ -276,15 +259,12 @@ const ChatPage = () => {
 
         if (msg != "") {
             let fecha = (new Date()).toISOString();
-            let user = "user0";   // cuando haya login, se recupera esta info de la sesión
-
             let id_from = currentUserId;
-        
 
             /* AXIOS */
             let data = await axios.post(sendMessageRoute, {
                 user_from: id_from,
-                user_to: "93",
+                user_to: actualID.toString(),
                 content: msg,
                 timestamp: fecha
             });
@@ -292,7 +272,7 @@ const ChatPage = () => {
             /* SOCKET */
             socket.current.emit("send-msg", {
                 from: id_from,
-                to: "93",
+                to: actualID.toString(),
                 msg: msg,
                 timestamp: fecha
             });
@@ -307,7 +287,7 @@ const ChatPage = () => {
             let cmessages = messages;
             cmessages.messages.push({
                 content: msg,
-                user_to: actual,
+                user_to: actualID,
                 user_from: localStorage.getItem("USER_ID"),
                 timestamp: 0
             });
@@ -315,7 +295,7 @@ const ChatPage = () => {
 
             /* ACTUALIZAR EL ÚLTIMO MENSAJE EN LOS CONTACTOS */ 
             let ccontacts = contacts;
-            ccontacts[actual].lastMsg = msg;
+            ccontacts[actual].content = msg;
             setContacts(ccontacts);
             setFilteredContacts(ccontacts);
 
@@ -327,6 +307,8 @@ const ChatPage = () => {
 
     useEffect(() => {
         function listen() {
+            console.log(socket.current);
+            console.log(1);
             if (socket.current) {
                 console.log("ARRIVAL MSG");
                 socket.current.on("msg-recieve", (msg) => {
@@ -335,7 +317,8 @@ const ChatPage = () => {
                         content: msg.msg,
                         user_to: msg.to,
                         user_from: msg.from,
-                        timestamp: msg.timestamp
+                        timestamp: msg.timestamp,
+                        seen: false
                     });
                 });
             }
@@ -344,13 +327,35 @@ const ChatPage = () => {
       }, [currentUser]);
 
     useEffect(() => {
+        function getIndex(contact, user_from) {
+            return contact.id == user_from;
+        }
         if (arrivalMessage) {
-            console.log(arrivalMessage);
-            let cMessages = messages;
-            cMessages.messages.push(arrivalMessage);
-            setMessages(cMessages);
+            if (contacts[actual] && arrivalMessage.user_from == contacts[actual].id) {
+                // console.log(arrivalMessage);
+                let cMessages = messages;
+                cMessages.messages.push(arrivalMessage);
+                setMessages(cMessages);
+            }
+
+            /* Encontrar el indice del array que tiene como id al usuario del cual llega el mensaje */
+            let index = -1;
+            for (let i=0; i<contacts.length; i++) {
+                // console.log(contacts[i].id);
+                // console.log(arrivalMessage.user_from);
+                if (contacts[i].id == arrivalMessage.user_from) {
+                    index = i;
+                }
+            }
+
+            console.log(index);
+            // console.log(contacts.find(function(element) { return element.id == arrivalMessage.user_from } ));
+            let ccontacts = contacts;
+            ccontacts[index].content = arrivalMessage.content;
+            setContacts(ccontacts);
+            setFilteredContacts(ccontacts);
+            setChange(!change);
             setUpdate(!update);
-            setArrivalMessage(undefined);
         }
         // arrivalMessage && setMensajes((prev) => [...prev, arrivalMessage]);
       }, [arrivalMessage]);
@@ -387,7 +392,7 @@ const ChatPage = () => {
                             <React.Fragment key={item}>
                                 <div onClick={() => handleClick(item)}>
                                     {/* <Contact name={element.user} msg={element.messages[element.messages.length-1][0]} id={item} actual={actual} slice={element.messages.slice(-1)} /> */}
-                                    <Contact name={element.user} msg={element.lastMsg} id={item} actual={actual} />
+                                    <Contact element={element} id={item} actual={actual} change={change} />
                                 </div>
                             </React.Fragment>
                         )
