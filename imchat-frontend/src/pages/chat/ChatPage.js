@@ -402,8 +402,8 @@ const ChatPage = () => {
                     <ChatMsg actual={actual} update={update} messages={messages} userID={currentUserId} />
 
                     <div className="text-bar">
-                        <input id="msg-input" type="text" placeholder="Escribe un mensaje" value={msg} onChange={(e) => setMsg(e.target.value)} />
-                        <div onClick={() => handleClickSubmit()}><IoIcons.IoSend/></div>
+                        <div id="msg-input-container"><input id="msg-input" type="text" placeholder="Escribe un mensaje" value={msg} onChange={(e) => setMsg(e.target.value)} /></div>
+                        <div id="msg-input-icon" onClick={() => handleClickSubmit()}><IoIcons.IoSend/></div>
                     </div>
                 </div>
             </div>
