@@ -82,7 +82,13 @@ export default function Register() {
     async function handleSubmit (event) {
         event.preventDefault();
         if (handleValidation()) {
-            const { phone, username, password, public_key } = values;
+
+            // const { phone, username, password, public_key } = values;
+            const { phone, username, password } = values;
+            /* Creación de llaves privada y pública */
+            const public_key = Date.now();
+            const private_key = Date.now();
+            /* Fin */
 
             var ePassword = CryptoJS.SHA256(password);
             console.log(ePassword.toString(CryptoJS.enc.Hex));
@@ -99,7 +105,11 @@ export default function Register() {
                 toast.error("Status 201!", toastOptions);
             }
             if (data.status === 201) {
-                setTimeout(function(){
+                /* GUARDAR LA LLAVE PRIVADA EN EL LS */
+                localStorage.setItem("PRIVATE_KEY", private_key);
+                /* FIN */
+
+                setTimeout(function() {
                     navigate("/login");
                 }, 6000);
                 toast.success("User created! Redirectioning...", toastOptions);
