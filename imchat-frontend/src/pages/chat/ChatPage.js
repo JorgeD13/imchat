@@ -12,17 +12,17 @@ import { waitFor } from "@testing-library/react";
 import { host, sendMessageRoute, allUsersRoute, recieveMessageRoute } from "./../../utils/APIRoutes";
 
 const Contact = (props) => {
-    const [seen, setSeen] = useState(props.element.seen);
+    // const [seen, setSeen] = useState(props.element.seen);
 
-    useEffect(() => {
-        setSeen(props.element.seen);
-        console.log("STA CAMIBANDO");
-    }, [props.element.seen, props.change])
+    // useEffect(() => {
+    //     setSeen(props.element.seen);
+    //     console.log("STA CAMIBANDO");
+    // }, [props.element.seen, props.change])
 
     if (props.id == props.actual) {
-        if (!seen) {
-            setSeen(true);
-        }
+        // if (!seen) {
+        //     setSeen(true);
+        // }
         return (
             <div className="user" style={{backgroundColor: "gray"}}>
                 <div className="name">
@@ -36,18 +36,20 @@ const Contact = (props) => {
     }
 
     return (
-        <div className="user" onClick={() => {setSeen(true)}}>
+        <div className="user">
+            {/* onClick={() => {setSeen(true)}} */}
             <div className="name">
                 {props.element.username}
             </div>
             <div className="last-message">
-                {
-                    props.element.user_from & !seen
+                {props.element.content}
+                {/* {
+                    props.element.user_from != props.me & !seen
                     ?
                     <div className="badge text-bg-success">{props.element.content}</div>
                     :
-                    <div className="msg-no-visto">{props.element.content}</div>
-                }
+                    <div className="msg-visto">{props.element.content}</div>
+                } */}
             </div>
         </div>
     )
@@ -144,7 +146,6 @@ const ChatPage = () => {
     });
     
     const [update, setUpdate] = useState(0);
-    const [change, setChange] = useState(0);
     const [actual, setActual] = useState(-1);
     const [actualID, setActualID] = useState(-1);
 
@@ -179,7 +180,6 @@ const ChatPage = () => {
                 console.log(response);
                 setContacts(response.data);
                 setFilteredContacts(response.data);
-                // setActualID(-1);
                 if (actualID == -1) {
                     setActualID(contacts[0].id);
                     setUpdate(!update);
@@ -206,8 +206,6 @@ const ChatPage = () => {
                 user2: actualID.toString()
             }).then(function(res) {
                 if (res.status == 200 && actual!=-1) {
-                    console.log(contacts);
-                    console.log(actual);
                     if (res.length != 0) {
                         const dataToAssign = {
                             userFrom: currentUser,
@@ -218,8 +216,6 @@ const ChatPage = () => {
                         setUpdate(!update);
     
                         let ccontacts = contacts;
-                        // console.log(res);
-                        // [res.data.length-1]
                         ccontacts[actual].content = res.data[res.data.length-1].content;
                         ccontacts[actual].visto = true;
                         setContacts(ccontacts);
@@ -312,13 +308,11 @@ const ChatPage = () => {
             if (socket.current) {
                 console.log("ARRIVAL MSG");
                 socket.current.on("msg-recieve", (msg) => {
-                    // setArrivalMessage({ fromSelf: false, message: msg });
                     setArrivalMessage({
                         content: msg.msg,
                         user_to: msg.to,
                         user_from: msg.from,
                         timestamp: msg.timestamp,
-                        seen: false
                     });
                 });
             }
@@ -327,12 +321,8 @@ const ChatPage = () => {
       }, [currentUser]);
 
     useEffect(() => {
-        function getIndex(contact, user_from) {
-            return contact.id == user_from;
-        }
         if (arrivalMessage) {
             if (contacts[actual] && arrivalMessage.user_from == contacts[actual].id) {
-                // console.log(arrivalMessage);
                 let cMessages = messages;
                 cMessages.messages.push(arrivalMessage);
                 setMessages(cMessages);
@@ -341,23 +331,16 @@ const ChatPage = () => {
             /* Encontrar el indice del array que tiene como id al usuario del cual llega el mensaje */
             let index = -1;
             for (let i=0; i<contacts.length; i++) {
-                // console.log(contacts[i].id);
-                // console.log(arrivalMessage.user_from);
-                if (contacts[i].id == arrivalMessage.user_from) {
-                    index = i;
-                }
+                if (contacts[i].id == arrivalMessage.user_from) index = i;
             }
 
-            console.log(index);
-            // console.log(contacts.find(function(element) { return element.id == arrivalMessage.user_from } ));
             let ccontacts = contacts;
             ccontacts[index].content = arrivalMessage.content;
             setContacts(ccontacts);
             setFilteredContacts(ccontacts);
-            setChange(!change);
+            // setChange(!change);
             setUpdate(!update);
         }
-        // arrivalMessage && setMensajes((prev) => [...prev, arrivalMessage]);
       }, [arrivalMessage]);
 
     const LogOut = () => {
@@ -392,7 +375,8 @@ const ChatPage = () => {
                             <React.Fragment key={item}>
                                 <div onClick={() => handleClick(item)}>
                                     {/* <Contact name={element.user} msg={element.messages[element.messages.length-1][0]} id={item} actual={actual} slice={element.messages.slice(-1)} /> */}
-                                    <Contact element={element} id={item} actual={actual} change={change} />
+                                    {/* <Contact element={element} me={currentUserId} id={item} actual={actual} change={change} /> */}
+                                    <Contact element={element} id={item} actual={actual} />
                                 </div>
                             </React.Fragment>
                         )
