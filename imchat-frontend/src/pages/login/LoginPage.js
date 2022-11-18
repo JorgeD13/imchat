@@ -1,4 +1,5 @@
 import {useEffect, useState} from "react";
+import secureLocalStorage from "react-secure-storage"
 import axios from "axios";
 import { authenticate, authFailure, authSuccess } from '../../redux/authActions';
 import { userLogin } from '../../api/authenticationService';
@@ -77,9 +78,9 @@ export default function LoginPage(){
         if (data.status === 200) {
             console.log("Codigo correcto!");
             console.log(data);
-            localStorage.setItem("USER", values.username);
-            localStorage.setItem("USER_ID", userid);
-            console.log(localStorage);
+            secureLocalStorage.setItem("USER", values.username);
+            secureLocalStorage.setItem("USER_ID", userid);
+            console.log(secureLocalStorage);
             setTimeout(function(){
                 navigate("/chat");
             }, 6000);

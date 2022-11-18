@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import secureLocalStorage from "react-secure-storage"
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import * as BiIcons from "react-icons/bi";
@@ -10,6 +11,7 @@ import { Last } from "react-bootstrap/esm/PageItem";
 import { getValue } from "@testing-library/user-event/dist/utils";
 import { waitFor } from "@testing-library/react";
 import { host, sendMessageRoute, allUsersRoute, recieveMessageRoute } from "./../../utils/APIRoutes";
+import deriveKey from "../../privacy/generateKeyPair";
 
 const Contact = (props) => {
     // const [seen, setSeen] = useState(props.element.seen);
@@ -157,14 +159,14 @@ const ChatPage = () => {
 
     useEffect(() => {
         async function session() {
-            if (!localStorage.getItem("USER")) {
+            if (!secureLocalStorage.getItem("USER")) {
                 navigate("/login");
             } else {
                 setCurrentUser(
-                    localStorage.getItem("USER")
+                    secureLocalStorage.getItem("USER")
                 );
                 setCurrentUserId(
-                    localStorage.getItem("USER_ID")
+                    secureLocalStorage.getItem("USER_ID")
                 );
             }
         }
@@ -175,7 +177,7 @@ const ChatPage = () => {
         async function loadContacts() {
             /* CONTACTOS */
             let data = await axios.post(allUsersRoute, {
-                userId: localStorage.getItem("USER_ID")
+                userId: secureLocalStorage.getItem("USER_ID")
             }).then(function(response) {
                 console.log(response);
                 setContacts(response.data);
@@ -201,12 +203,20 @@ const ChatPage = () => {
 
     useEffect(() => {
         if (currentUserId && actualID) {
+            const derivedKey = deriveKey(JSON.parse(filteredContacts[actual].public_key), secureLocalStorage.getItem("PRIVATE_KEY")).then((dd)=>{
+                //console.log(secureLocalStorage)
+                //console.log(secureLocalStorage.getItem("PRIVATE_KEY"))
+                //console.log(JSON.parse(filteredContacts[actual].public_key))
+                console.log(dd)
+            })
+            
             let data = axios.post(recieveMessageRoute, {
                 user1: currentUserId.toString(),
                 user2: actualID.toString()
             }).then(function(res) {
                 if (res.status == 200 && actual!=-1) {
-                    if (res.length != 0) {
+                    console.log(res);
+                    if (res.length != 0 && res.data.length != 0) {
                         const dataToAssign = {
                             userFrom: currentUser,
                             userTo: contacts[actual].username,
@@ -220,6 +230,8 @@ const ChatPage = () => {
                         ccontacts[actual].visto = true;
                         setContacts(ccontacts);
                         setFilteredContacts(ccontacts);
+                    } else {
+                        console.log("Chat vacio!");
                     }
                 } else {
                     console.log("ERROR!");
@@ -232,9 +244,6 @@ const ChatPage = () => {
         setActual(i);
         setActualID(contacts[i].id);
         setUpdate(!update);
-
-        // aqui se deben cambiar los mensajes
-        
     }
 
     const handleSearch = (e) => {
@@ -284,7 +293,7 @@ const ChatPage = () => {
             cmessages.messages.push({
                 content: msg,
                 user_to: actualID,
-                user_from: localStorage.getItem("USER_ID"),
+                user_from: secureLocalStorage.getItem("USER_ID"),
                 timestamp: 0
             });
             setMessages(cmessages);
@@ -344,8 +353,8 @@ const ChatPage = () => {
       }, [arrivalMessage]);
 
     const LogOut = () => {
-        localStorage.removeItem("USER");
-        localStorage.removeItem("USER_ID");
+        secureLocalStorage.removeItem("USER");
+        secureLocalStorage.removeItem("USER_ID");
         navigate("/login");
     }
 
