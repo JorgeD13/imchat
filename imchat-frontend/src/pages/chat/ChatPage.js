@@ -11,7 +11,9 @@ import { Last } from "react-bootstrap/esm/PageItem";
 import { getValue } from "@testing-library/user-event/dist/utils";
 import { waitFor } from "@testing-library/react";
 import { host, sendMessageRoute, allUsersRoute, recieveMessageRoute } from "./../../utils/APIRoutes";
-import deriveKey from "../../privacy/generateKeyPair";
+import deriveKey from "../../privacy/deriveKey";
+import encrypt from "../../privacy/encrypt"
+import decrypt from "../../privacy/decrypt"
 
 const Contact = (props) => {
     // const [seen, setSeen] = useState(props.element.seen);
@@ -157,6 +159,8 @@ const ChatPage = () => {
     const [currentUser, setCurrentUser] = useState(undefined);
     const [currentUserId, setCurrentUserId] = useState(undefined);
 
+    var derivedKey = undefined;
+
     useEffect(() => {
         async function session() {
             if (!secureLocalStorage.getItem("USER")) {
@@ -203,13 +207,6 @@ const ChatPage = () => {
 
     useEffect(() => {
         if (currentUserId && actualID) {
-            const derivedKey = deriveKey(JSON.parse(filteredContacts[actual].public_key), secureLocalStorage.getItem("PRIVATE_KEY")).then((dd)=>{
-                //console.log(secureLocalStorage)
-                //console.log(secureLocalStorage.getItem("PRIVATE_KEY"))
-                //console.log(JSON.parse(filteredContacts[actual].public_key))
-                console.log(dd)
-            })
-            
             let data = axios.post(recieveMessageRoute, {
                 user1: currentUserId.toString(),
                 user2: actualID.toString()
@@ -266,47 +263,54 @@ const ChatPage = () => {
             let fecha = (new Date()).toISOString();
             let id_from = currentUserId;
 
-            /* AXIOS */
-            let data = await axios.post(sendMessageRoute, {
-                user_from: id_from,
-                user_to: actualID.toString(),
-                content: msg,
-                timestamp: fecha
-            });
+            deriveKey(JSON.parse(filteredContacts[actual].public_key), secureLocalStorage.getItem("PRIVATE_KEY"))
+            .then(function(dk){
+                derivedKey = dk;
+                encrypt(msg, dk)
+                .then(async(encrypted_msg)=>{
+                    /* AXIOS */
+                    let data = await axios.post(sendMessageRoute, {
+                        user_from: id_from,
+                        user_to: actualID.toString(),
+                        content: encrypted_msg,
+                        timestamp: fecha
+                    });
 
-            /* SOCKET */
-            socket.current.emit("send-msg", {
-                from: id_from,
-                to: actualID.toString(),
-                msg: msg,
-                timestamp: fecha
-            });
+                    /* SOCKET */
+                    socket.current.emit("send-msg", {
+                        from: id_from,
+                        to: actualID.toString(),
+                        msg: msg,
+                        timestamp: fecha
+                    });
 
-            if (data.status == 200) {
-                console.log("SUCCES");
-            } else {
-                console.log("FAILED");
-            }
+                    if (data.status == 200) {
+                        console.log("SUCCES");
+                    } else {
+                        console.log("FAILED");
+                    }
 
-            /* HOOKS */
-            let cmessages = messages;
-            cmessages.messages.push({
-                content: msg,
-                user_to: actualID,
-                user_from: secureLocalStorage.getItem("USER_ID"),
-                timestamp: 0
-            });
-            setMessages(cmessages);
+                    /* HOOKS */
+                    let cmessages = messages;
+                    cmessages.messages.push({
+                        content: msg,
+                        user_to: actualID,
+                        user_from: secureLocalStorage.getItem("USER_ID"),
+                        timestamp: 0
+                    });
+                    setMessages(cmessages);
 
-            /* ACTUALIZAR EL ÚLTIMO MENSAJE EN LOS CONTACTOS */ 
-            let ccontacts = contacts;
-            ccontacts[actual].content = msg;
-            setContacts(ccontacts);
-            setFilteredContacts(ccontacts);
+                    /* ACTUALIZAR EL ÚLTIMO MENSAJE EN LOS CONTACTOS */ 
+                    let ccontacts = contacts;
+                    ccontacts[actual].content = msg;
+                    setContacts(ccontacts);
+                    setFilteredContacts(ccontacts);
 
-            /* ACTUALIZAR EL RENDER Y LIMPIAR EL INPUT */
-            setUpdate(!update);
-            setMsg("");
+                    /* ACTUALIZAR EL RENDER Y LIMPIAR EL INPUT */
+                    setUpdate(!update);
+                    setMsg("");
+                })
+            })
         }
     }
 
@@ -317,6 +321,7 @@ const ChatPage = () => {
             if (socket.current) {
                 console.log("ARRIVAL MSG");
                 socket.current.on("msg-recieve", (msg) => {
+                    console.log(msg)
                     setArrivalMessage({
                         content: msg.msg,
                         user_to: msg.to,
