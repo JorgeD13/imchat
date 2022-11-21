@@ -109,7 +109,9 @@ io.on("connection", (socket)=>{
     socket.on("send-msg", (data) => {
         // console.log("aqui");
         console.log(data);
+        console.log(1);
         const sendUserSocket = onlineUsers.get(data.to);
+        console.log(sendUserSocket);
         if (sendUserSocket) {
             socket.to(sendUserSocket).emit("msg-recieve", data);
             console.log("ENVIADO");

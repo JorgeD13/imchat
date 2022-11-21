@@ -110,17 +110,21 @@ const ChatMsg = (props) => {
         // console.log(mymessages["messages"]);
         setMymessages(props.messages);
         // console.log(mymessages["messages"]);
-    }, [mymessages, props.update]);
+    }, [props.update]);
 
     return (
         <div className="chat-msg">
-            {mymessages["messages"].map((element, item) => {
+            {   mymessages ?
+                mymessages["messages"].map((element, item) => {
                 return(
                 <React.Fragment key={item}>
                     <Textbox msg={element["content"]} sender={props.userID} other={element["user_from"]} />
                 </React.Fragment>
                 )
-            })} 
+                })
+                : <></>
+
+            } 
             <div ref={messagesEndRef}></div>
         </div>
     );
@@ -159,7 +163,8 @@ const ChatPage = () => {
     const [currentUser, setCurrentUser] = useState(undefined);
     const [currentUserId, setCurrentUserId] = useState(undefined);
 
-    var derivedKey = undefined;
+    // var derivedKey = undefined;
+    // const [derivedKey, setDerivedKey] = useState(undefined);
 
     useEffect(() => {
         async function session() {
@@ -184,6 +189,18 @@ const ChatPage = () => {
                 userId: secureLocalStorage.getItem("USER_ID")
             }).then(function(response) {
                 console.log(response);
+                for (let i = 0; i < response.data.length; i++) {
+                    console.log(response.data[i].content);
+                    if (response.data[i].content != null) {
+                        deriveKey(JSON.parse(response.data[i].public_key), secureLocalStorage.getItem("PRIVATE_KEY"))
+                        .then(function(dk) {
+                            decrypt(response.data[i].content, dk)
+                            .then(function(decrypted_msg) {
+                                response.data[i].content = decrypted_msg;
+                            })
+                        })
+                    }
+                }
                 setContacts(response.data);
                 setFilteredContacts(response.data);
                 if (actualID == -1) {
@@ -201,7 +218,7 @@ const ChatPage = () => {
         console.log(currentUser);
         if (currentUser) {
             socket.current = io(host);
-            socket.current.emit("add-user",  currentUserId);
+            socket.current.emit("add-user",  currentUserId.toString());
         }
     }, [currentUser]);
 
@@ -214,20 +231,62 @@ const ChatPage = () => {
                 if (res.status == 200 && actual!=-1) {
                     console.log(res);
                     if (res.length != 0 && res.data.length != 0) {
-                        const dataToAssign = {
-                            userFrom: currentUser,
-                            userTo: contacts[actual].username,
-                            messages: res.data
-                        }
-                        setMessages(dataToAssign);
-                        setUpdate(!update);
-    
-                        let ccontacts = contacts;
-                        ccontacts[actual].content = res.data[res.data.length-1].content;
-                        ccontacts[actual].visto = true;
-                        setContacts(ccontacts);
-                        setFilteredContacts(ccontacts);
+                        deriveKey(JSON.parse(contacts[actual].public_key), secureLocalStorage.getItem("PRIVATE_KEY"))
+                        .then(function(dk) {
+                            var copyres = res.data;
+                            for (let i = 0; i < copyres.length; i++) {
+                                decrypt(copyres[i].content, dk)
+                                .then(function(decrypted_msg) {
+                                    copyres[i].content = decrypted_msg;
+                                })
+                            }
+                            
+                            return copyres;
+                            /*                            
+                            .then(function(copyres) {
+                                const dataToAssign = {
+                                    user_from: currentUser,
+                                    user_to: contacts[actual].username,
+                                    messages: Array.from(copyres)
+                                }
+                                return dataToAssign;
+                            })
+                            */
+
+                            // let ccontacts = contacts;
+                            // console.log(messages.messages);
+                            // ccontacts[actual].content = messages.messages[res.data.length-1].content;
+                            // ccontacts[actual].visto = true;
+                            // setContacts(ccontacts);
+                            // setFilteredContacts(ccontacts);
+                            // // setUpdate(!update);
+                        })
+                        .then(function(copyres) {
+                            console.log(copyres);
+                            setMessages({
+                                user_from: currentUser,
+                                user_to: contacts[actual].username,
+                                messages: copyres
+                            });
+                            setUpdate(!update);
+                            console.log(messages);
+                        })
+                        .then(function() {
+                            let ccontacts = contacts;
+                            console.log(messages.messages);
+                            ccontacts[actual].content = messages.messages[res.data.length-1].content;
+                            ccontacts[actual].visto = true;
+                            setContacts(ccontacts);
+                            setFilteredContacts(ccontacts);
+                            setUpdate(!update);
+                        })
                     } else {
+                        setMessages({
+                            user_from: "",
+                            user_to: "",
+                            messages: []
+                        });
+                        setUpdate(!update);
                         console.log("Chat vacio!");
                     }
                 } else {
@@ -264,13 +323,13 @@ const ChatPage = () => {
             let id_from = currentUserId;
 
             deriveKey(JSON.parse(filteredContacts[actual].public_key), secureLocalStorage.getItem("PRIVATE_KEY"))
-            .then(function(dk){
-                derivedKey = dk;
+            .then(function(dk) {
+                //setDerivedKey(dk);
                 encrypt(msg, dk)
-                .then(async(encrypted_msg)=>{
-                    /* AXIOS */
+                .then(async (encrypted_msg) => {
+                  /* AXIOS */
                     let data = await axios.post(sendMessageRoute, {
-                        user_from: id_from,
+                        user_from: id_from.toString(),
                         user_to: actualID.toString(),
                         content: encrypted_msg,
                         timestamp: fecha
@@ -278,9 +337,9 @@ const ChatPage = () => {
 
                     /* SOCKET */
                     socket.current.emit("send-msg", {
-                        from: id_from,
+                        from: id_from.toString(),
                         to: actualID.toString(),
-                        msg: msg,
+                        msg: encrypted_msg,
                         timestamp: fecha
                     });
 
@@ -300,7 +359,7 @@ const ChatPage = () => {
                     });
                     setMessages(cmessages);
 
-                    /* ACTUALIZAR EL ÚLTIMO MENSAJE EN LOS CONTACTOS */ 
+                    /* ACTUALIZAR EL ÚLTIMO MENSAJE EN LOS CONTACTOS */
                     let ccontacts = contacts;
                     ccontacts[actual].content = msg;
                     setContacts(ccontacts);
@@ -309,25 +368,36 @@ const ChatPage = () => {
                     /* ACTUALIZAR EL RENDER Y LIMPIAR EL INPUT */
                     setUpdate(!update);
                     setMsg("");
-                })
+                });
             })
         }
     }
 
     useEffect(() => {
         function listen() {
-            console.log(socket.current);
-            console.log(1);
             if (socket.current) {
                 console.log("ARRIVAL MSG");
                 socket.current.on("msg-recieve", (msg) => {
-                    console.log(msg)
-                    setArrivalMessage({
-                        content: msg.msg,
-                        user_to: msg.to,
-                        user_from: msg.from,
-                        timestamp: msg.timestamp,
-                    });
+                    let index = -1;
+                    for (let i=0; i<contacts.length; i++) {
+                        if (contacts[i].id.toString() == msg.from.toString()) index = i;
+                    }
+                    if (index != -1) {
+                        console.log(currentUserId);
+                    }
+                    
+                    deriveKey(JSON.parse(contacts[index].public_key), secureLocalStorage.getItem("PRIVATE_KEY"))
+                    .then(function(dk){
+                        decrypt(msg.msg, dk)
+                        .then(function(decrypted_msg){
+                            setArrivalMessage({
+                                content: decrypted_msg,
+                                user_to: msg.to,
+                                user_from: msg.from,
+                                timestamp: msg.timestamp,
+                            });
+                        })
+                    })
                 });
             }
         }
