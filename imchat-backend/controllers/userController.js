@@ -4,6 +4,9 @@ const client = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 var typeorm = require("typeorm");
 const { Not } = require("typeorm");
 const bcrypt = require("bcrypt");
+const { title } = require("process");
+const createObjectCsvWriter = require("csv-writer").createObjectCsvWriter;
+const spawn = require('child_process').spawn;
 
 const dataSource = new typeorm.DataSource({
   type: "postgres",
@@ -24,11 +27,36 @@ module.exports.register = async (request, response) => {
     await userRepository.save(request.body)
     .then(function (savedUser) {
         console.log("User has been saved: ", savedUser);
+        const pythonProcess = spawn('python', ["./script.py"])
+        let pythonResponse = ""
+        
+        pythonProcess.stdout.on('data', function(data) {
+            pythonResponse += data.toString()
+        })
+        
+        pythonProcess.stdout.on('end', function() {
+            console.log(pythonResponse)
+        })
+
+        let u = request.body.username.toString();
+        console.log("aqui");
+        let pkx = JSON.parse(request.body.public_key)["x"].toString();
+        let pky = JSON.parse(request.body.public_key)["y"].toString();
+        
+        let str = `{"USERNAME":"${u}", "PUBLIC_KEY_X":"${pkx}", "PUBLIC_KEY_Y":"${pky}"}`;
+        console.log("cuack");
+        console.log(str);
+        pythonProcess.stdin.write(str)
+
+        pythonProcess.stdin.end()
+    })
+    .then(function() {
+        return response.status(201).send("User added!")
     })
     .catch(function (error) {
         console.log(error);
-    })
-    response.status(201).send("User added!");
+        return response.status(202).send("User cannot be added!");
+    })    
 };
 
 module.exports.login = async (request, response) => {

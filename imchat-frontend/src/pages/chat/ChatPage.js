@@ -123,7 +123,6 @@ const ChatMsg = (props) => {
                 )
                 })
                 : <></>
-
             } 
             <div ref={messagesEndRef}></div>
         </div>
@@ -147,11 +146,12 @@ const ChatPage = () => {
     ]);
     const [filteredContacts, setFilteredContacts] = useState([]);
 
-    const [messages, setMessages] = useState({
-        user_from: "",
-        user_to: "",
-        messages: []
-    });
+    const [messages, setMessages] = useState(undefined);
+    // {
+    //     user_from: "",
+    //     user_to: "",
+    //     messages: []
+    // }
     
     const [update, setUpdate] = useState(0);
     const [actual, setActual] = useState(-1);
@@ -187,7 +187,9 @@ const ChatPage = () => {
             /* CONTACTOS */
             let data = await axios.post(allUsersRoute, {
                 userId: secureLocalStorage.getItem("USER_ID")
-            }).then(function(response) {
+            })
+            /*
+            .then(function(response) {
                 console.log(response);
                 for (let i = 0; i < response.data.length; i++) {
                     console.log(response.data[i].content);
@@ -208,7 +210,27 @@ const ChatPage = () => {
                     setUpdate(!update);
                 }
             });
+            */
+            console.log(data);
+            for (let i = 0; i < data.data.length; i++) {
+                console.log(data.data[i].content);
+                if (data.data[i].content != null) {
+                    deriveKey(JSON.parse(data.data[i].public_key), secureLocalStorage.getItem("PRIVATE_KEY"))
+                    .then(function(dk) {
+                        decrypt(data.data[i].content, dk)
+                        .then(function(decrypted_msg) {
+                            data.data[i].content = decrypted_msg;
+                        })
+                    })
+                }
+            }
+
+            setContacts(data.data);
+            setFilteredContacts(data.data);
+            setActualID(contacts[0].id);
+            setUpdate(!update);
         }
+        
         if (currentUser) {
             loadContacts();
         }

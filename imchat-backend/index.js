@@ -13,10 +13,26 @@ app.use("/api/auth", userRoutes);
 app.use("/api/messages", messageRoutes);
 
 var typeorm = require("typeorm");
-const { getRepository } = require("typeorm");
+const { getRepository, Column } = require("typeorm");
 const socket = require("socket.io");
+const spawn = require('child_process').spawn;
 
 //
+// (()=>{
+//     const pythonProcess = spawn('python', ["./script.py"])
+//     let pythonResponse = ""
+    
+//     pythonProcess.stdout.on('data', function(data) {
+//         pythonResponse += data.toString()
+//     })
+    
+//     pythonProcess.stdout.on('end', function() {
+//         console.log(pythonResponse)
+//     })
+//     let str = '{"USERNAME":' + '"jorge"' + ',"PUBLIC_KEY":' + '"somekey2"' + '}';
+//     pythonProcess.stdin.write(str)
+//     pythonProcess.stdin.end()
+// })()
 
 /* (async () => {
     var dataSource = new typeorm.DataSource({
