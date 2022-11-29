@@ -28,6 +28,10 @@ module.exports = new EntitySchema({
             nullable: false,
             unique: true,
         },
+        salt: {
+            type: "text",
+            nullable: false,
+        }
     },
 /*     relations: {
         categories: {

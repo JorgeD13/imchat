@@ -21,6 +21,7 @@ var userRepository = dataSource.getRepository("User")
 var queryRunner = dataSource.createQueryRunner();
 
 module.exports.register = async (request, response) => {
+  console.log(request.body)
     await userRepository.save(request.body)
     .then(function (savedUser) {
         console.log("User has been saved: ", savedUser);
@@ -29,6 +30,24 @@ module.exports.register = async (request, response) => {
         console.log(error);
     })
     response.status(201).send("User added!");
+};
+
+module.exports.registerphone = async (request, response) => {
+  return response.status(200).json("Mensaje enviado");
+  try {
+    await client.verify.services(TWILIO_VERIFY_SID)
+    .verifications
+    .create({
+      to : `+51${request.body.phone}`,
+      channel: `sms`
+    })
+    .then(data => {
+      return response.status(200).json("Mensaje enviado");
+    })
+  } catch (error) {
+    console.log(error);
+    return response.status(202).send("CANT SEND A MESSAGE!?!?!?!?!?!??!?!?!?!?!?");
+  }
 };
 
 module.exports.login = async (request, response) => {
@@ -41,15 +60,20 @@ module.exports.login = async (request, response) => {
   .catch(function (error) {
     console.log(error)
   })
-  console.log(user);
+  
+  if (!user) {
+    return response.status(202).json("No existe el usuario");
+  } else {
+    //   return response.status(200).json(user); // borrar
+    console.log(user);
+  //   delete user['id'];
+    delete user['public_key'];
+    delete user['password'];
+  //   console.log(user);
+    return response.status(200).json(user);
+  }
 
-//   return response.status(200).json(user); // borrar
-  console.log(user);
-//   delete user['id'];
-  delete user['public_key'];
-  delete user['password'];
-//   console.log(user);
-  return response.status(200).json(user);
+
   if (user) {
     try {
       await client.verify.services(TWILIO_VERIFY_SID)

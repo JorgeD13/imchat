@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import secureLocalStorage from "react-secure-storage"
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import { registerRoute } from "../../utils/APIRoutes";
+import { codeRoute, registerRoute, registerPhoneRoute } from "../../utils/APIRoutes";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CryptoJS from 'crypto-js';
@@ -19,7 +19,11 @@ function isValidPassword(str) {
 }
 
 export default function Register() {
+    const [flag, setFlag] = useState(1);
+    const [code, setCode] = useState(0);
+
     const [keyPair, setKeyPair] = useState(null);
+
     const navigate = useNavigate();
     const toastOptions = {
         position: "bottom-right",
@@ -79,18 +83,41 @@ export default function Register() {
             toast.error("Phone number is required.", toastOptions);
             return false;
         }
-
+        //setPhone(values.phone);
         return true;
     };
 
     async function handleSubmit (event) {
         event.preventDefault();
+        const { phone } = values;
         if (handleValidation()) {
+            let data = await axios.post(registerPhoneRoute, {
+                phone
+            });
 
-            // const { phone, username, password, public_key } = values;
-            const { phone, username, password } = values;
+            if (data.status === 200) {
+                console.log("Sesion creada!");
+                setFlag(0);
+            } else {
+                toast.error("Status Error! Try Again.")
+            }
+        }
+    }
 
-            var ePassword = CryptoJS.SHA256(password);
+    async function handleCodeSubmit(evt) {
+        evt.preventDefault();
+        const { phone, username, password } = values;
+        // console.log("LOCAL STORE: ", localStorage);
+
+        console.log(code);
+        let data = await axios.post(codeRoute, {
+            code,
+            phone
+        });
+
+        if (data.status === 200) {
+            var salt = CryptoJS.lib.WordArray.random(128 / 32);
+            var ePassword = CryptoJS.PBKDF2(password, salt.toString(CryptoJS.enc.Hex), {keySize: 128/32});
 
             setKeyPair(await generateKeyPair()
                 .then(async(kp)=>{
@@ -99,7 +126,8 @@ export default function Register() {
                         username,
                         phone,
                         password: ePassword.toString(CryptoJS.enc.Hex),
-                        public_key: JSON.stringify(kp["publicKeyJwk"])
+                        public_key: JSON.stringify(kp["publicKeyJwk"]),
+                        salt: salt
                     });
                     if (data.status !== 201) {
                         console.log(data);
@@ -108,6 +136,7 @@ export default function Register() {
                     if (data.status === 201) {
                         /* GUARDAR LA LLAVE PRIVADA EN EL LS */
                         secureLocalStorage.setItem("PRIVATE_KEY", kp["privateKeyJwk"]);
+                        secureLocalStorage.setItem("SALT", salt.toString(CryptoJS.enc.Hex));
                         console.log("hola")
                         console.log(secureLocalStorage.getItem("PRIVATE_KEY"))
                         /* FIN */
@@ -126,9 +155,17 @@ export default function Register() {
                 .catch((e)=> {
                     console.log(e);
                 })
-            );        
+            );
+        } else {
+            // toast.error("Status Error! Try Again.");
+            console.log(1);
         }
-    };
+    }
+
+    const handleCodeChange=(e)=>{
+        e.persist();
+        setCode(e.target.value);
+    }
 
     return (
         <div className="registration-page">
@@ -141,6 +178,8 @@ export default function Register() {
                                     <div className="card-title-container">
                                     { <h4 className="card-title"></h4> }
                                     </div>
+                                    {
+                                    flag ?
                                     <form className="my-registration-validation" action="" onSubmit={(event) => handleSubmit(event)}>
                                         <div className="form-group">
                                             <label>Username</label>
@@ -188,6 +227,20 @@ export default function Register() {
                                             </button>
                                         </div>
                                     </form>
+                                    :
+                                    <form className="CODE-VALIDATION" onSubmit={handleCodeSubmit}>
+                                        <div className="form-group">
+                                            <label>CODE</label>
+                                            <input id="code" type="text" className="form-control" minLength={5} value={code} onChange={handleCodeChange} name="code" />
+                                                <div className="invalid-feedback">
+                                                    UserId is invalid
+                                                </div>                                            
+                                        </div>
+                                        <button id="code-btn" type="sumbit" className="btn btn-primary">
+                                            Send code!
+                                        </button>
+                                    </form>
+                                    }
                                 </div>
                             </div>
                         </div>
