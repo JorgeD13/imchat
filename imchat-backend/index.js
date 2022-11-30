@@ -6,7 +6,7 @@ const userRoutes = require("./routes/userRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 
 const app = express();
- 
+
 app.use(cors());
 app.use(express.json());
 app.use("/api/auth", userRoutes);
@@ -15,7 +15,6 @@ app.use("/api/messages", messageRoutes);
 var typeorm = require("typeorm");
 const { getRepository, Column } = require("typeorm");
 const socket = require("socket.io");
-const spawn = require('child_process').spawn;
 
 //
 // (()=>{

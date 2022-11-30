@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import secureLocalStorage from "react-secure-storage"
+import secureLocalStorage from "react-secure-storage";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import * as BiIcons from "react-icons/bi";
@@ -12,21 +12,11 @@ import { getValue } from "@testing-library/user-event/dist/utils";
 import { waitFor } from "@testing-library/react";
 import { host, sendMessageRoute, allUsersRoute, recieveMessageRoute } from "./../../utils/APIRoutes";
 import deriveKey from "../../privacy/deriveKey";
-import encrypt from "../../privacy/encrypt"
-import decrypt from "../../privacy/decrypt"
+import encrypt from "../../privacy/encrypt";
+import decrypt from "../../privacy/decrypt";
 
 const Contact = (props) => {
-    // const [seen, setSeen] = useState(props.element.seen);
-
-    // useEffect(() => {
-    //     setSeen(props.element.seen);
-    //     console.log("STA CAMIBANDO");
-    // }, [props.element.seen, props.change])
-
     if (props.id == props.actual) {
-        // if (!seen) {
-        //     setSeen(true);
-        // }
         return (
             <div className="user" style={{backgroundColor: "gray"}}>
                 <div className="name">
@@ -41,19 +31,11 @@ const Contact = (props) => {
 
     return (
         <div className="user">
-            {/* onClick={() => {setSeen(true)}} */}
             <div className="name">
                 {props.element.username}
             </div>
             <div className="last-message">
                 {props.element.content}
-                {/* {
-                    props.element.user_from != props.me & !seen
-                    ?
-                    <div className="badge text-bg-success">{props.element.content}</div>
-                    :
-                    <div className="msg-visto">{props.element.content}</div>
-                } */}
             </div>
         </div>
     )
@@ -110,20 +92,17 @@ const ChatMsg = (props) => {
         // console.log(mymessages["messages"]);
         setMymessages(props.messages);
         // console.log(mymessages["messages"]);
-    }, [props.update]);
+    }, [mymessages, props.update]);
 
     return (
         <div className="chat-msg">
-            {   mymessages ?
-                mymessages["messages"].map((element, item) => {
+            {mymessages["messages"].map((element, item) => {
                 return(
                 <React.Fragment key={item}>
                     <Textbox msg={element["content"]} sender={props.userID} other={element["user_from"]} />
                 </React.Fragment>
                 )
-                })
-                : <></>
-            } 
+            })} 
             <div ref={messagesEndRef}></div>
         </div>
     );
@@ -141,19 +120,18 @@ const ChatPage = () => {
             content: "",
             user_from: -1,
             public_key: "",
-            visto: false
         }
     ]);
     const [filteredContacts, setFilteredContacts] = useState([]);
 
-    const [messages, setMessages] = useState(undefined);
-    // {
-    //     user_from: "",
-    //     user_to: "",
-    //     messages: []
-    // }
+    const [messages, setMessages] = useState({
+        user_from: "",
+        user_to: "",
+        messages: []
+    });
     
     const [update, setUpdate] = useState(0);
+    const [change, setChange] = useState(0);
     const [actual, setActual] = useState(-1);
     const [actualID, setActualID] = useState(-1);
 
@@ -162,9 +140,6 @@ const ChatPage = () => {
 
     const [currentUser, setCurrentUser] = useState(undefined);
     const [currentUserId, setCurrentUserId] = useState(undefined);
-
-    // var derivedKey = undefined;
-    // const [derivedKey, setDerivedKey] = useState(undefined);
 
     useEffect(() => {
         async function session() {
@@ -185,52 +160,32 @@ const ChatPage = () => {
     useEffect(() => {
         async function loadContacts() {
             /* CONTACTOS */
-            let data = await axios.post(allUsersRoute, {
+            var data = await axios.post(allUsersRoute, {
                 userId: secureLocalStorage.getItem("USER_ID")
             })
-            /*
-            .then(function(response) {
-                console.log(response);
-                for (let i = 0; i < response.data.length; i++) {
-                    console.log(response.data[i].content);
-                    if (response.data[i].content != null) {
-                        deriveKey(JSON.parse(response.data[i].public_key), secureLocalStorage.getItem("PRIVATE_KEY"))
-                        .then(function(dk) {
-                            decrypt(response.data[i].content, dk)
-                            .then(function(decrypted_msg) {
-                                response.data[i].content = decrypted_msg;
-                            })
-                        })
-                    }
-                }
-                setContacts(response.data);
-                setFilteredContacts(response.data);
-                if (actualID == -1) {
-                    setActualID(contacts[0].id);
-                    setUpdate(!update);
-                }
-            });
-            */
-            console.log(data);
-            for (let i = 0; i < data.data.length; i++) {
-                console.log(data.data[i].content);
-                if (data.data[i].content != null) {
-                    deriveKey(JSON.parse(data.data[i].public_key), secureLocalStorage.getItem("PRIVATE_KEY"))
-                    .then(function(dk) {
-                        decrypt(data.data[i].content, dk)
-                        .then(function(decrypted_msg) {
-                            data.data[i].content = decrypted_msg;
-                        })
-                    })
-                }
+
+            secureLocalStorage.setItem("CONTACTS", data.data);
+            
+            console.log(secureLocalStorage.getItem("CONTACTS"));
+            console.log(data.data);
+            for (let i=0; i<secureLocalStorage.getItem("CONTACTS").length; i++) {
+                const dk = await deriveKey(JSON.parse(secureLocalStorage.getItem("CONTACTS")[i].public_key), secureLocalStorage.getItem("PRIVATE_KEY"));
+                console.log(i);
+                if (data.data[i].content == null)
+                    continue;
+                data.data[i].content = await decrypt(data.data[i].content, dk);
             }
 
             setContacts(data.data);
             setFilteredContacts(data.data);
-            setActualID(contacts[0].id);
-            setUpdate(!update);
+            
+            if (actualID == -1) {
+                setActualID(contacts[0].id);
+                setUpdate(!update);
+            }
+
+            console.log(secureLocalStorage.getItem("CONTACTS"));
         }
-        
         if (currentUser) {
             loadContacts();
         }
@@ -245,63 +200,36 @@ const ChatPage = () => {
     }, [currentUser]);
 
     useEffect(() => {
-        if (currentUserId && actualID) {
-            let data = axios.post(recieveMessageRoute, {
-                user1: currentUserId.toString(),
-                user2: actualID.toString()
-            }).then(function(res) {
-                if (res.status == 200 && actual!=-1) {
-                    console.log(res);
-                    if (res.length != 0 && res.data.length != 0) {
-                        deriveKey(JSON.parse(contacts[actual].public_key), secureLocalStorage.getItem("PRIVATE_KEY"))
-                        .then(function(dk) {
-                            var copyres = res.data;
-                            for (let i = 0; i < copyres.length; i++) {
-                                decrypt(copyres[i].content, dk)
-                                .then(function(decrypted_msg) {
-                                    copyres[i].content = decrypted_msg;
-                                })
-                            }
-                            
-                            return copyres;
-                            /*                            
-                            .then(function(copyres) {
-                                const dataToAssign = {
-                                    user_from: currentUser,
-                                    user_to: contacts[actual].username,
-                                    messages: Array.from(copyres)
-                                }
-                                return dataToAssign;
-                            })
-                            */
+        async function fetchActual() {
+            if (currentUserId && actualID) {
+                var data = await axios.post(recieveMessageRoute, {
+                    user1: currentUserId.toString(),
+                    user2: actualID.toString()
+                })
+                if (data.status == 200 && actual!=-1) {
+                    // console.log(contacts);
+                    // console.log(actual);
+                    console.log(data);
+                    if (data.data.length != 0) {
+                        const dk = await deriveKey(JSON.parse(contacts[actual].public_key), secureLocalStorage.getItem("PRIVATE_KEY"));
 
-                            // let ccontacts = contacts;
-                            // console.log(messages.messages);
-                            // ccontacts[actual].content = messages.messages[res.data.length-1].content;
-                            // ccontacts[actual].visto = true;
-                            // setContacts(ccontacts);
-                            // setFilteredContacts(ccontacts);
-                            // // setUpdate(!update);
-                        })
-                        .then(function(copyres) {
-                            console.log(copyres);
-                            setMessages({
-                                user_from: currentUser,
-                                user_to: contacts[actual].username,
-                                messages: copyres
-                            });
-                            setUpdate(!update);
-                            console.log(messages);
-                        })
-                        .then(function() {
-                            let ccontacts = contacts;
-                            console.log(messages.messages);
-                            ccontacts[actual].content = messages.messages[res.data.length-1].content;
-                            ccontacts[actual].visto = true;
-                            setContacts(ccontacts);
-                            setFilteredContacts(ccontacts);
-                            setUpdate(!update);
-                        })
+                        for (let i=0; i<data.data.length; i++) {
+                            data.data[i].content = await decrypt(data.data[i].content, dk);
+                        }
+
+                        var dataToAssign = {
+                            userFrom: currentUser,
+                            userTo: contacts[actual].username,
+                            messages: data.data
+                        }
+
+                        setMessages(dataToAssign);
+                        setUpdate(!update);
+    
+                        let ccontacts = contacts;
+                        ccontacts[actual].content = data.data[data.data.length-1].content;
+                        setContacts(ccontacts);
+                        setFilteredContacts(ccontacts);
                     } else {
                         setMessages({
                             user_from: "",
@@ -314,14 +242,18 @@ const ChatPage = () => {
                 } else {
                     console.log("ERROR!");
                 }
-            });
+            }
         }
+        fetchActual();
     }, [actual])
 
     const handleClick = async (i) => {
         setActual(i);
         setActualID(contacts[i].id);
         setUpdate(!update);
+
+        // aqui se deben cambiar los mensajes
+        
     }
 
     const handleSearch = (e) => {
@@ -344,82 +276,80 @@ const ChatPage = () => {
             let fecha = (new Date()).toISOString();
             let id_from = currentUserId;
 
-            deriveKey(JSON.parse(filteredContacts[actual].public_key), secureLocalStorage.getItem("PRIVATE_KEY"))
-            .then(function(dk) {
-                //setDerivedKey(dk);
-                encrypt(msg, dk)
-                .then(async (encrypted_msg) => {
-                  /* AXIOS */
-                    let data = await axios.post(sendMessageRoute, {
-                        user_from: id_from.toString(),
-                        user_to: actualID.toString(),
-                        content: encrypted_msg,
-                        timestamp: fecha
-                    });
+            /* LLAVE */
+            const dk = await deriveKey(JSON.parse(filteredContacts[actual].public_key), secureLocalStorage.getItem("PRIVATE_KEY"));
+            const e_msg = await encrypt(msg, dk);
 
-                    /* SOCKET */
-                    socket.current.emit("send-msg", {
-                        from: id_from.toString(),
-                        to: actualID.toString(),
-                        msg: encrypted_msg,
-                        timestamp: fecha
-                    });
+            /* AXIOS */
+            let data = await axios.post(sendMessageRoute, {
+                user_from: id_from.toString(),
+                user_to: actualID.toString(),
+                content: e_msg,
+                timestamp: fecha
+            });
 
-                    if (data.status == 200) {
-                        console.log("SUCCES");
-                    } else {
-                        console.log("FAILED");
-                    }
+            /* SOCKET */
+            socket.current.emit("send-msg", {
+                from: id_from.toString(),
+                to: actualID.toString(),
+                msg: e_msg,
+                timestamp: fecha
+            });
 
-                    /* HOOKS */
-                    let cmessages = messages;
-                    cmessages.messages.push({
-                        content: msg,
-                        user_to: actualID,
-                        user_from: secureLocalStorage.getItem("USER_ID"),
-                        timestamp: 0
-                    });
-                    setMessages(cmessages);
+            if (data.status == 200) {
+                console.log("SUCCES");
+            } else {
+                console.log("FAILED");
+            }
 
-                    /* ACTUALIZAR EL ÚLTIMO MENSAJE EN LOS CONTACTOS */
-                    let ccontacts = contacts;
-                    ccontacts[actual].content = msg;
-                    setContacts(ccontacts);
-                    setFilteredContacts(ccontacts);
+            /* HOOKS */
+            let cmessages = messages;
+            cmessages.messages.push({
+                content: msg,
+                user_to: actualID,
+                user_from: secureLocalStorage.getItem("USER_ID"),
+                timestamp: 0
+            });
+            setMessages(cmessages);
 
-                    /* ACTUALIZAR EL RENDER Y LIMPIAR EL INPUT */
-                    setUpdate(!update);
-                    setMsg("");
-                });
-            })
+            /* ACTUALIZAR EL ÚLTIMO MENSAJE EN LOS CONTACTOS */ 
+            let ccontacts = contacts;
+            ccontacts[actual].content = msg;
+            setContacts(ccontacts);
+            setFilteredContacts(ccontacts);
+
+            /* ACTUALIZAR EL RENDER Y LIMPIAR EL INPUT */
+            setUpdate(!update);
+            setMsg("");
         }
     }
 
     useEffect(() => {
         function listen() {
+            console.log(socket.current);
+            console.log(1);
             if (socket.current) {
                 console.log("ARRIVAL MSG");
-                socket.current.on("msg-recieve", (msg) => {
-                    let index = -1;
-                    for (let i=0; i<contacts.length; i++) {
-                        if (contacts[i].id.toString() == msg.from.toString()) index = i;
+                socket.current.on("msg-recieve", async (msg) => {
+                    // setArrivalMessage({ fromSelf: false, message: msg });
+                    var index = -1;
+                    const ccontacts = secureLocalStorage.getItem("CONTACTS");
+                    for (let i=0; i<ccontacts.length; i++) {
+                        if (ccontacts[i].id.toString() == msg.from.toString()) index = i;
                     }
                     if (index != -1) {
                         console.log(currentUserId);
                     }
-                    
-                    deriveKey(JSON.parse(contacts[index].public_key), secureLocalStorage.getItem("PRIVATE_KEY"))
-                    .then(function(dk){
-                        decrypt(msg.msg, dk)
-                        .then(function(decrypted_msg){
-                            setArrivalMessage({
-                                content: decrypted_msg,
-                                user_to: msg.to,
-                                user_from: msg.from,
-                                timestamp: msg.timestamp,
-                            });
-                        })
-                    })
+
+                    const dk = await deriveKey(JSON.parse(secureLocalStorage.getItem("CONTACTS")[index].public_key), secureLocalStorage.getItem("PRIVATE_KEY"));
+                    const d_msg = await decrypt(msg.msg, dk);
+
+                    setArrivalMessage({
+                        content: d_msg,
+                        user_to: msg.to,
+                        user_from: msg.from,
+                        timestamp: msg.timestamp,
+                    });
                 });
             }
         }
@@ -429,6 +359,7 @@ const ChatPage = () => {
     useEffect(() => {
         if (arrivalMessage) {
             if (contacts[actual] && arrivalMessage.user_from == contacts[actual].id) {
+                // console.log(arrivalMessage);
                 let cMessages = messages;
                 cMessages.messages.push(arrivalMessage);
                 setMessages(cMessages);
@@ -437,16 +368,23 @@ const ChatPage = () => {
             /* Encontrar el indice del array que tiene como id al usuario del cual llega el mensaje */
             let index = -1;
             for (let i=0; i<contacts.length; i++) {
-                if (contacts[i].id == arrivalMessage.user_from) index = i;
+                // console.log(contacts[i].id);
+                // console.log(arrivalMessage.user_from);
+                if (contacts[i].id == arrivalMessage.user_from) {
+                    index = i;
+                }
             }
 
+            console.log(index);
+            // console.log(contacts.find(function(element) { return element.id == arrivalMessage.user_from } ));
             let ccontacts = contacts;
             ccontacts[index].content = arrivalMessage.content;
             setContacts(ccontacts);
             setFilteredContacts(ccontacts);
-            // setChange(!change);
+            setChange(!change);
             setUpdate(!update);
         }
+        // arrivalMessage && setMensajes((prev) => [...prev, arrivalMessage]);
       }, [arrivalMessage]);
 
     const LogOut = () => {
@@ -481,8 +419,7 @@ const ChatPage = () => {
                             <React.Fragment key={item}>
                                 <div onClick={() => handleClick(item)}>
                                     {/* <Contact name={element.user} msg={element.messages[element.messages.length-1][0]} id={item} actual={actual} slice={element.messages.slice(-1)} /> */}
-                                    {/* <Contact element={element} me={currentUserId} id={item} actual={actual} change={change} /> */}
-                                    <Contact element={element} id={item} actual={actual} />
+                                    <Contact element={element} id={item} actual={actual} change={change} />
                                 </div>
                             </React.Fragment>
                         )
@@ -501,6 +438,5 @@ const ChatPage = () => {
     )
     
 }
-
 
 export default ChatPage;
