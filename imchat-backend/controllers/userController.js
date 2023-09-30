@@ -61,7 +61,7 @@ module.exports.register = async (request, response) => {
 };
 
 module.exports.registerphone = async (request, response) => {
-  return response.status(200).json("Mensaje enviado");
+  //return response.status(200).json("Mensaje enviado");
   try {
     await client.verify.services(TWILIO_VERIFY_SID)
     .verifications
@@ -89,7 +89,7 @@ module.exports.login = async (request, response) => {
     console.log(error)
   })
   
-  if (!user) {
+  /* if (!user) {
     return response.status(202).json("No existe el usuario");
   } else {
     //   return response.status(200).json(user); // borrar
@@ -99,7 +99,7 @@ module.exports.login = async (request, response) => {
     delete user['password'];
   //   console.log(user);
     return response.status(200).json(user);
-  }
+  } */
 
 
   if (user) {
@@ -129,7 +129,7 @@ module.exports.login = async (request, response) => {
 
 module.exports.verify = async (request, response) => {
   console.log(request.body);
-  return response.status(200).send({ message: "User is Verified!!!!!!!!!" }); // borrar
+  //return response.status(200).send({ message: "User is Verified!!!!!!!!!" }); // borrar
   if (request.body.phone && (request.body.code).length === 6) {
     await client
     .verify
