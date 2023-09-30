@@ -1,4 +1,4 @@
-# Aplicación de mensajería instantánea - ImChat
+# Aplicación de mensajería instantánea en la nube - ImChat
 
 ## Integrantes
 * Luis Carbajal
