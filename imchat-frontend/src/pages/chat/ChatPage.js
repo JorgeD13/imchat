@@ -11,9 +11,6 @@ import { Last } from "react-bootstrap/esm/PageItem";
 import { getValue } from "@testing-library/user-event/dist/utils";
 import { waitFor } from "@testing-library/react";
 import { host, sendMessageRoute, allUsersRoute, recieveMessageRoute } from "./../../utils/APIRoutes";
-import deriveKey from "../../privacy/deriveKey";
-import encrypt from "../../privacy/encrypt";
-import decrypt from "../../privacy/decrypt";
 
 const Contact = (props) => {
     if (props.id == props.actual) {
@@ -169,11 +166,10 @@ const ChatPage = () => {
             console.log(secureLocalStorage.getItem("CONTACTS"));
             console.log(data.data);
             for (let i=0; i<secureLocalStorage.getItem("CONTACTS").length; i++) {
-                const dk = await deriveKey(JSON.parse(secureLocalStorage.getItem("CONTACTS")[i].public_key), secureLocalStorage.getItem("PRIVATE_KEY"));
                 console.log(i);
                 if (data.data[i].content == null)
                     continue;
-                data.data[i].content = await decrypt(data.data[i].content, dk);
+                data.data[i].content = data.data[i].content;
             }
 
             setContacts(data.data);
@@ -211,10 +207,9 @@ const ChatPage = () => {
                     // console.log(actual);
                     console.log(data);
                     if (data.data.length != 0) {
-                        const dk = await deriveKey(JSON.parse(contacts[actual].public_key), secureLocalStorage.getItem("PRIVATE_KEY"));
 
                         for (let i=0; i<data.data.length; i++) {
-                            data.data[i].content = await decrypt(data.data[i].content, dk);
+                            data.data[i].content = data.data[i].content;
                         }
 
                         var dataToAssign = {
@@ -270,21 +265,15 @@ const ChatPage = () => {
     }
 
     const handleClickSubmit = async () => {
-        // let msg = await document.getElementById("msg-input").value;
 
         if (msg != "") {
             let fecha = (new Date()).toISOString();
             let id_from = currentUserId;
 
-            /* LLAVE */
-            const dk = await deriveKey(JSON.parse(filteredContacts[actual].public_key), secureLocalStorage.getItem("PRIVATE_KEY"));
-            const e_msg = await encrypt(msg, dk);
-
-            /* AXIOS */
             let data = await axios.post(sendMessageRoute, {
                 user_from: id_from.toString(),
                 user_to: actualID.toString(),
-                content: e_msg,
+                content: msg,
                 timestamp: fecha
             });
 
@@ -292,7 +281,7 @@ const ChatPage = () => {
             socket.current.emit("send-msg", {
                 from: id_from.toString(),
                 to: actualID.toString(),
-                msg: e_msg,
+                msg: msg,
                 timestamp: fecha
             });
 
@@ -341,11 +330,8 @@ const ChatPage = () => {
                         console.log(currentUserId);
                     }
 
-                    const dk = await deriveKey(JSON.parse(secureLocalStorage.getItem("CONTACTS")[index].public_key), secureLocalStorage.getItem("PRIVATE_KEY"));
-                    const d_msg = await decrypt(msg.msg, dk);
-
                     setArrivalMessage({
-                        content: d_msg,
+                        content: msg.msg,
                         user_to: msg.to,
                         user_from: msg.from,
                         timestamp: msg.timestamp,
@@ -368,8 +354,6 @@ const ChatPage = () => {
             /* Encontrar el indice del array que tiene como id al usuario del cual llega el mensaje */
             let index = -1;
             for (let i=0; i<contacts.length; i++) {
-                // console.log(contacts[i].id);
-                // console.log(arrivalMessage.user_from);
                 if (contacts[i].id == arrivalMessage.user_from) {
                     index = i;
                 }

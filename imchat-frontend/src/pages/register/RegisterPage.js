@@ -5,9 +5,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { codeRoute, registerRoute, registerPhoneRoute } from "../../utils/APIRoutes";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import CryptoJS from 'crypto-js';
 import "./RegisterPage.scss";
-import generateKeyPair from "../../privacy/generateKeyPair";
 
 function isValidPassword(str) {
     var pattern = new RegExp(
@@ -116,46 +114,30 @@ export default function Register() {
         });
 
         if (data.status === 200) {
-            var salt = CryptoJS.lib.WordArray.random(128 / 32);
-            var ePassword = CryptoJS.PBKDF2(password, salt.toString(CryptoJS.enc.Hex), {keySize: 128/32});
 
-            setKeyPair(await generateKeyPair()
-                .then(async(kp)=>{
-                    console.log(kp);
-                    let data = await axios.post(registerRoute, {
-                        username,
-                        phone,
-                        password: ePassword.toString(CryptoJS.enc.Hex),
-                        public_key: JSON.stringify(kp["publicKeyJwk"]),
-                        salt: salt
-                    });
-                    if (data.status !== 201) {
-                        console.log(data);
-                        toast.error("Status 201!", toastOptions);
-                    }
-                    if (data.status === 201) {
-                        /* GUARDAR LA LLAVE PRIVADA EN EL LS */
-                        secureLocalStorage.setItem("PRIVATE_KEY", kp["privateKeyJwk"]);
-                        secureLocalStorage.setItem("SALT", salt.toString(CryptoJS.enc.Hex));
-                        console.log("hola")
-                        console.log(secureLocalStorage.getItem("PRIVATE_KEY"))
-                        /* FIN */
-        
-                        setTimeout(function() {
-                            navigate("/login");
-                        }, 6000);
-                        toast.success("User created! Redirectioning...", toastOptions);
-                        secureLocalStorage.setItem(
-                        process.env.REACT_APP_LOCALHOST_KEY,
-                        JSON.stringify(data.data.username)
-                        );
-                        console.log(secureLocalStorage);
-                    }
-                })
-                .catch((e)=> {
-                    console.log(e);
-                })
-            );
+            let data = await axios.post(registerRoute, {
+                username,
+                phone,
+                password: password,
+                public_key: "",
+                salt: ""
+            });
+            if (data.status !== 201) {
+                console.log(data);
+                toast.error("Status 201!", toastOptions);
+            }
+            if (data.status === 201) {
+                console.log("hola")
+                /* FIN */
+                setTimeout(function() {
+                    navigate("/login");
+                }, 6000);
+                toast.success("User created! Redirectioning...", toastOptions);
+                secureLocalStorage.setItem(
+                    JSON.stringify(data.data.username)
+                );
+                console.log(secureLocalStorage);
+            }
         } else {
             // toast.error("Status Error! Try Again.");
             console.log(1);

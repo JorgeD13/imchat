@@ -38,11 +38,10 @@ export default function LoginPage(){
         // console.log("LOCAL STORE: ", localStorage);
 
         const {username, password} = values;
-        var ePassword = CryptoJS.PBKDF2(password, secureLocalStorage.getItem("SALT"), {keySize: 128/32});
 
         let data = await axios.post(loginRoute, {
-            username,
-            password: ePassword.toString(CryptoJS.enc.Hex)
+            username, username,
+            password: password
         });
         console.log(data);
         if (data.status === 200) {

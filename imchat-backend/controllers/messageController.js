@@ -4,14 +4,14 @@ const bcrypt = require("bcrypt");
 
 var dataSource = new typeorm.DataSource({
     type: "postgres",
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    username: process.env.DB_USER,
+    host: process.env.DB_HOST || "127.0.0.1",
+    port: process.env.DB_PORT || "27017",
+    database: process.env.DB_NAME || "test",
+    username: process.env.DB_USER || "postgres",
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
     synchronize: true,
     entities: [require("./../models/messageModel")],
-})
+});
 
 dataSource.initialize();
 var msgRepository = dataSource.getRepository("Message")
@@ -45,6 +45,8 @@ module.exports.getmsgs = async (request, response) => {
         where (user_to = ${request.body.user1} and user_from = ${request.body.user2})
         or (user_to = ${request.body.user2} and user_from = ${request.body.user1})
     `;
+    
+    // var queryRunner = dataSource.createQueryRunner();
     var result = await queryRunner.manager.query(sql);
     // console.log(result);
     return response.status(200).send(result);

@@ -25,8 +25,7 @@ module.exports = new EntitySchema({
         },
         public_key: {
             type: "text",
-            nullable: false,
-            unique: true,
+            nullable: false
         },
         salt: {
             type: "text",

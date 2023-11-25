@@ -1,6 +1,6 @@
 const { response } = require("express");
 const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_VERIFY_SID } = process.env;
-const client = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+const client = require('twilio')("ACfa1ac5770c24762e636485e17104b083", "0335e0aa6629bba06eee063dafe82b8c");
 var typeorm = require("typeorm");
 const { Not } = require("typeorm");
 const bcrypt = require("bcrypt");
@@ -8,24 +8,23 @@ const { title } = require("process");
 const createObjectCsvWriter = require("csv-writer").createObjectCsvWriter;
 const spawn = require('child_process').spawn;
 
-var dataSource = new typeorm.DataSource({
-    type: "postgres",
-    host: process.env.DB_HOST || "127.0.0.1",
-    port: process.env.DB_PORT || "27017",
-    database: process.env.DB_NAME || "test",
-    username: process.env.DB_USER || "postgres",
-    password: process.env.DB_PASSWORD,
-    synchronize: true,
-    entities: [require("./../models/userModel")],
+const dataSource = new typeorm.DataSource({
+  type: "mongodb",
+  host: process.env.DB_HOST || "127.0.0.1",
+  port: process.env.DB_PORT || "27017",
+  username: process.env.DB_USER || "my_user",
+  password: process.env.DB_PASSWORD || "my_pwd",
+  database: process.env.DB_NAME || "mern",
+  synchronize: true,
+  entities: [require("./../models/userModel")],
 });
 
 dataSource.initialize();
-var userRepository = dataSource.getRepository("User");
+var userRepository = dataSource.getRepository("User")
 var queryRunner = dataSource.createQueryRunner();
 
 module.exports.register = async (request, response) => {
-    console.log(request.body);
-
+  console.log(request.body)
     await userRepository.save(request.body)
     .then(function (savedUser) {
         console.log("User has been saved: ", savedUser);
@@ -42,12 +41,12 @@ module.exports.register = async (request, response) => {
 
         let u = request.body.username.toString();
         console.log("aqui");
-        // let pkx = JSON.parse(request.body.public_key)["x"].toString();
-        // let pky = JSON.parse(request.body.public_key)["y"].toString();
+        let pkx = JSON.parse(request.body.public_key)["x"].toString();
+        let pky = JSON.parse(request.body.public_key)["y"].toString();
         
-        let str = `{"USERNAME":"${u}", "PUBLIC_KEY_X":"x", "PUBLIC_KEY_Y":"y"}`;
-        // console.log("cuack");
-        // console.log(str);
+        let str = `{"USERNAME":"${u}", "PUBLIC_KEY_X":"${pkx}", "PUBLIC_KEY_Y":"${pky}"}`;
+        console.log("cuack");
+        console.log(str);
         pythonProcess.stdin.write(str)
 
         pythonProcess.stdin.end()
@@ -62,22 +61,21 @@ module.exports.register = async (request, response) => {
 };
 
 module.exports.registerphone = async (request, response) => {
-    // console.log("REGISTERPHONE");
-    // return response.status(200).json("Mensaje enviado");
-    try {
-        await client.verify.services(TWILIO_VERIFY_SID)
-        .verifications
-        .create({
-        to : `+51${request.body.phone}`,
-        channel: `sms`
-        })
-        .then(data => {
-        return response.status(200).json("Mensaje enviado");
-        })
-    } catch (error) {
-        console.log(error);
-        return response.status(202).send("CANT SEND A MESSAGE!?!?!?!?!?!??!?!?!?!?!?");
-    }
+  return response.status(200).json("Mensaje enviado");
+  try {
+    await client.verify.services(TWILIO_VERIFY_SID)
+    .verifications
+    .create({
+      to : `+51${request.body.phone}`,
+      channel: `sms`
+    })
+    .then(data => {
+      return response.status(200).json("Mensaje enviado");
+    })
+  } catch (error) {
+    console.log(error);
+    return response.status(202).send("CANT SEND A MESSAGE!?!?!?!?!?!??!?!?!?!?!?");
+  }
 };
 
 module.exports.login = async (request, response) => {
@@ -91,7 +89,6 @@ module.exports.login = async (request, response) => {
     console.log(error)
   })
   
-  /*
   if (!user) {
     return response.status(202).json("No existe el usuario");
   } else {
@@ -103,7 +100,6 @@ module.exports.login = async (request, response) => {
   //   console.log(user);
     return response.status(200).json(user);
   }
-    */
 
   if (user) {
     try {
@@ -132,7 +128,7 @@ module.exports.login = async (request, response) => {
 
 module.exports.verify = async (request, response) => {
   console.log(request.body);
-//   return response.status(200).send({ message: "User is Verified!!!!!!!!!" }); // borrar
+  return response.status(200).send({ message: "User is Verified!!!!!!!!!" }); // borrar
   if (request.body.phone && (request.body.code).length === 6) {
     await client
     .verify
@@ -169,7 +165,6 @@ module.exports.getusers = async (request, response) => {
       on u.id = m.user_util
       where u.id != ${curr_user}
   `
-//   var queryRunner = dataSource.createQueryRunner();
   var result = await queryRunner.manager.query(sql);
   return response.status(200).send(result);
 }

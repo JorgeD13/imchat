@@ -2,12 +2,22 @@ require("dotenv").config()
 
 const express = require("express");
 const cors = require("cors");
+
 const userRoutes = require("./routes/userRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 
 const app = express();
 
-app.use(cors());
+// app.use(cors());
+// app.use(cors({origin: 'http://imchat-frontend.s3-website.us-east-2.amazonaws.com'}));
+
+app.use((req,res, next)=>{
+    res.setHeader('Access-Control-Allow-Origin',"*");
+    res.setHeader('Access-Control-Allow-Headers',"*");
+    res.header('Access-Control-Allow-Credentials', true);
+    next();
+});
+
 app.use(express.json());
 app.use("/api/auth", userRoutes);
 app.use("/api/messages", messageRoutes);
@@ -16,111 +26,24 @@ var typeorm = require("typeorm");
 const { getRepository, Column } = require("typeorm");
 const socket = require("socket.io");
 
-//
-// (()=>{
-//     const pythonProcess = spawn('python', ["./script.py"])
-//     let pythonResponse = ""
-    
-//     pythonProcess.stdout.on('data', function(data) {
-//         pythonResponse += data.toString()
-//     })
-    
-//     pythonProcess.stdout.on('end', function() {
-//         console.log(pythonResponse)
-//     })
-//     let str = '{"USERNAME":' + '"jorge"' + ',"PUBLIC_KEY":' + '"somekey2"' + '}';
-//     pythonProcess.stdin.write(str)
-//     pythonProcess.stdin.end()
-// })()
-
 const spawn = require("child_process").spawn;
 const pythonProcess = spawn('python',["./utils/test.py"]);
 
-/* let pythonResponse = ""
-
-pythonProcess.stdout.on("data", function(data) {
-    pythonResponse = data.toString();
-});
-
-pythonProcess.stdout.on("end", function(){
-    console.log(pythonResponse);
-}) */
 
 pythonProcess.stdin.end() 
 
-//
+app.get("/prueba", (req, res) => {
+    console.log("here too");
+    res.send("HERE!!");
+})
 
-/* (async () => {
-    var dataSource = new typeorm.DataSource({
-        type: "postgres",
-        host: process.env.DB_HOST,
-        port: process.env.DB_PORT,
-        username: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_NAME,
-        synchronize: true,
-        entities: [require("./models/userModel")],
-    })
-    const d = await dataSource.initialize();
-    const queryRunner = await d.createQueryRunner();
-
-    let user_id = 1//request.body.user_id;
-    const sql = `
-        select username, public_key, user_from, content
-        from imchat.user u
-        left join (
-            select distinct on (user_util) *, case when user_to = ${user_id} then user_from else user_to end as user_util
-            from imchat.message
-            where user_to = ${user_id}
-            or user_from = ${user_id}
-            order by user_util, timestamp desc
-        ) m
-        on u.id = m.user_util
-        where u.id != 1
-    `
-    var result = await queryRunner.manager.query(sql);
-
-    // var msgRepository = await d.getRepository("Message")
-    console.log(result); 
-})() */
-
-/* dataSource
-    .initialize()
-    .then(function () {
-        var msg = {
-            user_to: 1,
-            user_from: 2,
-            content: "aaa",
-            timestamp: fecha.toISOString()
-        }
-
-        var msgRepository = dataSource.getRepository("Message")
-        msgRepository
-            .save(msg)
-            .then(function (savedMsg) {
-                console.log("Message has been saved: ", savedMsg)
-                console.log("Now lets load all messages: ")
-
-                return msgRepository.find()
-            })
-            .then(function (allMsgs) {
-                console.log("All messages: ", allMsgs)
-            })
-    })
-    .catch(function (error) {
-        console.log("Error: ", error)
-    }) */
-
-
-// `insert into times (time) values (to_timestamp(${Date.now()} / 1000.0))`
-
-const server = app.listen(process.env.PORT, ()=>{
-    console.log(`Server started on port ${process.env.PORT}`);
+const server = app.listen(process.env.PORT || 5000, ()=>{
+    console.log(`Server started on port ${process.env.PORT || 5000}`);
 });
 
 const io = socket(server, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: "*",
         credentials: true
     }
 });
@@ -152,3 +75,4 @@ io.on("connection", (socket)=>{
         }
     })
 })
+
